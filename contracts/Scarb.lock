@@ -23,8 +23,8 @@ version = "2.8.4"
 source = "git+https://github.com/dojoengine/dojo?tag=v1.0.9#04b5f025d998eee19cd21d33bd8a992498a73160"
 
 [[package]]
-name = "dojo_starter"
-version = "1.0.9"
+name = "nothing_game"
+version = "0.0.1"
 dependencies = [
  "dojo",
  "dojo_cairo_test",

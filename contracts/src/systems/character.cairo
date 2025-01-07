@@ -12,10 +12,11 @@ mod character_system {
     use starknet::{get_caller_address};
 
     use nothing_game::models::{
-        CharacterItem::{CharacterItemRegistry, CharacterItem}, Item::{Item, ItemRegistry},
-        Shop::Shop, BackpackGrid::BackpackGrid,
+        CharacterItem::{CharacterItemRegistry, CharacterItem, Position}, Item::{Item, ItemRegistry},
+        Shop::Shop, BackpackGrid::BackpackGrid, Character::Character,
     };
-    use nothing_game::constants::constants::{INIT_GOLD};
+    use nothing_game::constants::constants::{INIT_GOLD, GRID_X, GRID_Y};
+    use nothing_game::utils::grids::get_neighbors;
 
     use dojo::model::{ModelStorage, ModelValueStorage};
 
@@ -40,17 +41,6 @@ mod character_system {
                         health: 0,
                     },
                 );
-
-            // Default the player has 2 bags
-            // Must add two bag items when setup the game
-            let item: Item = world.read_model(Backpack::id);
-            assert(item.itemType == 4, 'Invalid item type');
-            let item: Item = world.read_model(Pack::id);
-            assert(item.itemType == 4, 'Invalid item type');
-
-            world.write_model(@CharacterItemStorage { player, id: 1, itemId: Backpack::id });
-            world.write_model(@CharacterItemStorage { player, id: 2, itemId: Pack::id });
-            world.write_model(@CharacterItemsStorageCounter { player, count: 2 });
         }
 
         fn buy_item(ref self: ContractState, item_id: u32, x: u8, y: u8, rotation: u8) {
@@ -78,7 +68,7 @@ mod character_system {
             }
 
             // Check if the player has enough gold
-            let mut character: Characters = world.read_model(player);
+            let mut character: Character = world.read_model(player);
             assert(character.gold >= item.price, 'not enough gold');
             character.gold -= item.price;
 
@@ -106,6 +96,9 @@ mod character_system {
             let mut item_registry: CharacterItemRegistry = world.read_model(player);
             let mut count = item_registry.next_slot_id;
 
+            // get all the neighbors of the item
+            let neighbors = get_neighbors(x, y, xMax, yMax, GRID_X, GRID_Y);
+
             let mut character_item = CharacterItem {
                 player,
                 slot_id: 0,
@@ -113,6 +106,8 @@ mod character_system {
                 position: Position { x, y },
                 rotation: rotation,
                 effect_applied: false,
+                owned: array![(x, y), (xMax, yMax)],
+                neighbors: neighbors,
             };
 
             loop {
@@ -250,7 +245,7 @@ mod character_system {
 
             let player = get_caller_address();
 
-            let mut character: Characters = world.read_model(player);
+            let mut character: Character = world.read_model(player);
 
             let mut character_item: CharacterItem = world.read_model((player, slot_id));
             assert(character_item.item_id != 0, 'item not exists');
@@ -285,7 +280,7 @@ mod character_system {
                         break;
                     }
 
-                    let grid: BackpackGrid = world.read_model((player, i, j));
+                    let mut grid: BackpackGrid = world.read_model((player, i, j));
                     if item.item_type == 4 {
                         assert(!grid.occupied, 'Bag is used');
                         grid.enabled = false;
@@ -303,7 +298,7 @@ mod character_system {
                         world.write_model(@grid);
                     }
                 }
-            }
+            };
 
             // unapply effect
             if item.item_type == 3 {

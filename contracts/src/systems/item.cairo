@@ -28,6 +28,7 @@ mod item_system {
     use nothing_game::constants::constants::{GRID_X, GRID_Y, ITEM_REGISTRY_ID};
 
     use dojo::model::{ModelStorage, ModelValueStorage};
+    use dojo::world::{WorldStorageTrait, IWorldDispatcherTrait};
 
     #[abi(embed_v0)]
     impl ItemImpl of IItem<ContractState> {
@@ -49,8 +50,7 @@ mod item_system {
         ) {
             let mut world = self.world(@"nothing_game");
 
-            let admin = get_caller_address();
-            assert(world.dispatcher.is_owner(0, admin), 'admin not world owner');
+            assert(world.dispatcher.is_owner(0, get_caller_address()), 'admin not world owner');
 
             assert(width > 0 && width <= GRID_X, 'width not in range');
             assert(height > 0 && height <= GRID_Y, 'height not in range');

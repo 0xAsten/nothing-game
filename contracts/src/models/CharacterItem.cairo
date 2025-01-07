@@ -6,7 +6,7 @@ struct Position {
     y: u8,
 }
 
-#[derive(Copy, Drop, Serde, Debug)]
+#[derive(Drop, Serde, Debug)]
 #[dojo::model]
 struct CharacterItem {
     #[key]
@@ -18,6 +18,8 @@ struct CharacterItem {
     // 0=0, 1=90, 2=180, 3=270
     rotation: u8,
     effect_applied: bool,
+    owned: Array<(u8, u8)>,
+    neighbors: Array<(u8, u8)>,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]

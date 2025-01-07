@@ -1,5 +1,7 @@
 mod systems {
-    mod actions;
+    mod character;
+    mod shop;
+    mod item;
 }
 
 mod models {
@@ -7,6 +9,12 @@ mod models {
     mod CharacterItem;
     mod Item;
     mod Shop;
-};
+    mod Character;
+}
 
 mod constants;
+
+mod utils {
+    mod grids;
+    mod random;
+}
