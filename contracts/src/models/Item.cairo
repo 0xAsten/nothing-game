@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 
+// only accessory can have effect
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
 pub struct Item {
@@ -8,15 +9,16 @@ pub struct Item {
     pub name: felt252,
     // Item type: 1=weapon, 2=armor, 3=accessory, 4=bag, etc.
     pub item_type: u8,
+    pub rarity: u8,
+    // Item dimensions
+    pub width: u8,
+    pub height: u8,
     // Base price in Gold
     pub price: u32,
     // Base stats
     pub attack: u32,
     pub defense: u32,
     pub health: u32,
-    // Item dimensions
-    pub width: u8,
-    pub height: u8,
     // Special effect 1=attack, 2=defense, 3=health
     pub special_effect: u8,
     pub special_effect_stacks: u32,

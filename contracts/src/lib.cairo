@@ -2,8 +2,11 @@ mod systems {
     mod actions;
 }
 
-mod models;
+mod models {
+    mod BackpackGrid;
+    mod CharacterItem;
+    mod Item;
+    mod Shop;
+};
 
-mod tests {
-    mod test_world;
-}
+mod constants;

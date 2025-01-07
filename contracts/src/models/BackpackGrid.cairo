@@ -6,7 +6,7 @@ struct BackpackGrid {
     #[key]
     player: ContractAddress,
     #[key]
-    x: usize,
+    x: u8,
     #[key]
     y: u8,
     enabled: bool,

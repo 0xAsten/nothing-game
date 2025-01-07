@@ -17,6 +17,7 @@ struct CharacterItem {
     position: Position,
     // 0=0, 1=90, 2=180, 3=270
     rotation: u8,
+    effect_applied: bool,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]
