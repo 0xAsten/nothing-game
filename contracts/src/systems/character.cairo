@@ -100,13 +100,13 @@ mod character_system {
 
             // check if the item can be placed in the backpack
             // loop each grid of the item
+            let mut cx = x;
             loop {
-                let mut cx = x;
                 if cx > xMax {
                     break;
                 }
+                let mut cy = y;
                 loop {
-                    let mut cy = y;
                     if cy > yMax {
                         break;
                     }
@@ -342,13 +342,13 @@ mod character_system {
                 }
             }
             // If this is a bag item, disable the grids it enabled
+            let mut cx = x;
             loop {
-                let mut cx = x;
                 if cx > xMax {
                     break;
                 }
+                let mut cy = y;
                 loop {
-                    let mut cy = y;
                     if cy > yMax {
                         break;
                     }
