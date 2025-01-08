@@ -30,6 +30,12 @@ mod character_system {
             let character: Character = world.read_model(player);
             assert(character.initialized == false, 'character already initialized');
 
+            let mut shop: Shop = world.read_model(player);
+            shop.item1_id = 24;
+            world.write_model(@shop);
+
+            self.buy_item(24, 3, 2, 0);
+
             world
                 .write_model(
                     @Character {
