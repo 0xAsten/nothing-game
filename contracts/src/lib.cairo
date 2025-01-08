@@ -18,3 +18,7 @@ mod utils {
     mod grids;
     mod random;
 }
+
+mod tests {
+    mod test_character;
+}

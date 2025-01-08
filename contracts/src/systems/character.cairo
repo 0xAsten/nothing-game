@@ -30,12 +30,6 @@ mod character_system {
             let character: Character = world.read_model(player);
             assert(character.initialized == false, 'character already initialized');
 
-            let mut shop: Shop = world.read_model(player);
-            shop.item1_id = 24;
-            world.write_model(@shop);
-
-            self.buy_item(24, 3, 2, 0);
-
             world
                 .write_model(
                     @Character {
@@ -47,6 +41,12 @@ mod character_system {
                         health: 0,
                     },
                 );
+
+            let mut shop: Shop = world.read_model(player);
+            shop.item1_id = 24;
+            world.write_model(@shop);
+
+            self.buy_item(24, 3, 2, 0);
         }
 
         fn buy_item(ref self: ContractState, item_id: u32, x: u8, y: u8, rotation: u8) {
@@ -243,6 +243,8 @@ mod character_system {
 
             let mut character_item: CharacterItem = world.read_model((player, slot_id));
             assert(character_item.item_id != 0, 'item not exists');
+
+            let item: Item = world.read_model(character_item.item_id);
 
             let (x, y) = *character_item.owned.at(0);
             let (xMax, yMax) = *character_item.owned.at(1);

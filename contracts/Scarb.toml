@@ -8,8 +8,8 @@ sierra-replace-ids = true
 
 [scripts]
 migrate = "sozo build && sozo migrate"                      # scarb run migrate
-# spawn = "sozo execute nothing_game-actions spawn --wait"    # scarb run spawn
-# move = "sozo execute nothing_game-actions move -c 1 --wait" # scarb run move
+spawn = "sozo execute nothing_game-character_system spawn --wait"    # scarb run spawn
+# move = "sozo execute nothing_game-character_system move -c 1 --wait" # scarb run move
 
 [dependencies]
 dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.9" }

@@ -89,7 +89,7 @@ fn rectangles_adjacent(x1: u8, y1: u8, x2: u8, y2: u8, x3: u8, y3: u8, x4: u8, y
 
 #[cfg(test)]
 mod tests {
-    use super::{get_neighbors, get_owned, rectangles_overlap};
+    use super::{get_neighbors, get_owned, rectangles_overlap, rectangles_adjacent};
 
     #[test]
     fn test_get_neighbors() {

@@ -1,9 +1,9 @@
 {
   "world": {
-    "class_hash": "0x79d9ce84b97bcc2a631996c3100d57966fc2f5b061fb1ec4dfd0040976bcac6",
-    "address": "0xe2ea9b5dd9804d13903edf712998943b7d5d606c139dd0f13eeb8f5b84da8d",
-    "seed": "dojo_starter",
-    "name": "Dojo starter",
+    "class_hash": "0x45575a88cc5cef1e444c77ce60b7b4c9e73a01cbbe20926d5a4c72a94011410",
+    "address": "0x456e4818b95a2fffc646f691e8df897952d2bb7e520232bdeeb26d91259ece9",
+    "seed": "nothing_game",
+    "name": "Nothing Game",
     "entrypoints": [
       "uuid",
       "set_metadata",
@@ -92,6 +92,10 @@
           {
             "name": "metadata_uri",
             "type": "core::byte_array::ByteArray"
+          },
+          {
+            "name": "metadata_hash",
+            "type": "core::felt252"
           }
         ]
       },
@@ -1002,6 +1006,11 @@
             "name": "uri",
             "type": "core::byte_array::ByteArray",
             "kind": "data"
+          },
+          {
+            "name": "hash",
+            "type": "core::felt252",
+            "kind": "data"
           }
         ]
       },
@@ -1243,12 +1252,12 @@
   },
   "contracts": [
     {
-      "address": "0x58b83bea84766c5725c12e239c1ec9e1fde679ddf709b772fe7a8fdfd3cda27",
-      "class_hash": "0x3f87eccb39c9dc7bb70d372350f4360ae1ff9da43bd72c89a96e336402a569b",
+      "address": "0x5968364afb3141d7c41acce833176bd205522a6b1289952502f2c6c06bfe061",
+      "class_hash": "0x114039009297cae9b1668a419846cb625d625192fcea03b6ae975b4fd19b169",
       "abi": [
         {
           "type": "impl",
-          "name": "actions__ContractImpl",
+          "name": "character_system__ContractImpl",
           "interface_name": "dojo::contract::interface::IContract"
         },
         {
@@ -1258,7 +1267,7 @@
         },
         {
           "type": "impl",
-          "name": "actions__DeployedContractImpl",
+          "name": "character_system__DeployedContractImpl",
           "interface_name": "dojo::meta::interface::IDeployedResource"
         },
         {
@@ -1298,38 +1307,12 @@
         },
         {
           "type": "impl",
-          "name": "ActionsImpl",
-          "interface_name": "dojo_starter::systems::actions::IActions"
-        },
-        {
-          "type": "enum",
-          "name": "dojo_starter::models::Direction",
-          "variants": [
-            {
-              "name": "None",
-              "type": "()"
-            },
-            {
-              "name": "Left",
-              "type": "()"
-            },
-            {
-              "name": "Right",
-              "type": "()"
-            },
-            {
-              "name": "Up",
-              "type": "()"
-            },
-            {
-              "name": "Down",
-              "type": "()"
-            }
-          ]
+          "name": "CharacterImpl",
+          "interface_name": "nothing_game::systems::character::ICharacter"
         },
         {
           "type": "interface",
-          "name": "dojo_starter::systems::actions::IActions",
+          "name": "nothing_game::systems::character::ICharacter",
           "items": [
             {
               "type": "function",
@@ -1340,11 +1323,35 @@
             },
             {
               "type": "function",
-              "name": "move",
+              "name": "buy_item",
               "inputs": [
                 {
-                  "name": "direction",
-                  "type": "dojo_starter::models::Direction"
+                  "name": "item_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "x",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "y",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "rotation",
+                  "type": "core::integer::u8"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "remove_item",
+              "inputs": [
+                {
+                  "name": "slot_id",
+                  "type": "core::integer::u32"
                 }
               ],
               "outputs": [],
@@ -1451,7 +1458,7 @@
         },
         {
           "type": "event",
-          "name": "dojo_starter::systems::actions::actions::Event",
+          "name": "nothing_game::systems::character::character_system::Event",
           "kind": "enum",
           "variants": [
             {
@@ -1468,11 +1475,455 @@
         }
       ],
       "init_calldata": [],
-      "tag": "dojo_starter-actions",
-      "selector": "0x7a1c71029f2d0b38e3ac89b09931d08b6e48417e079c289ff19a8698d0cba33",
+      "tag": "nothing_game-character_system",
+      "selector": "0x2e1d7dc51d8e625509059354883444a3bd9f36fe6faacdd80e127c6f0929043",
       "systems": [
         "spawn",
-        "move",
+        "buy_item",
+        "remove_item",
+        "upgrade"
+      ]
+    },
+    {
+      "address": "0x3947d33b805364a655b5082f4f3a1ec0ac2f2ae045251ed7f642be028b38308",
+      "class_hash": "0x13403a3fa4d93ff0a99b11a8d0b1650ca1001ad7529cd6fd7eb8f7cd8f3ee52",
+      "abi": [
+        {
+          "type": "impl",
+          "name": "item_system__ContractImpl",
+          "interface_name": "dojo::contract::interface::IContract"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::interface::IContract",
+          "items": []
+        },
+        {
+          "type": "impl",
+          "name": "item_system__DeployedContractImpl",
+          "interface_name": "dojo::meta::interface::IDeployedResource"
+        },
+        {
+          "type": "struct",
+          "name": "core::byte_array::ByteArray",
+          "members": [
+            {
+              "name": "data",
+              "type": "core::array::Array::<core::bytes_31::bytes31>"
+            },
+            {
+              "name": "pending_word",
+              "type": "core::felt252"
+            },
+            {
+              "name": "pending_word_len",
+              "type": "core::integer::u32"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::meta::interface::IDeployedResource",
+          "items": [
+            {
+              "type": "function",
+              "name": "dojo_name",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "ItemImpl",
+          "interface_name": "nothing_game::systems::item::IItem"
+        },
+        {
+          "type": "interface",
+          "name": "nothing_game::systems::item::IItem",
+          "items": [
+            {
+              "type": "function",
+              "name": "add_item",
+              "inputs": [
+                {
+                  "name": "item_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "name",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "item_type",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "rarity",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "width",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "height",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "price",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "attack",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "defense",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "health",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "special_effect",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "special_effect_stacks",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "stack_group_id",
+                  "type": "core::integer::u8"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "function",
+          "name": "dojo_init",
+          "inputs": [],
+          "outputs": [],
+          "state_mutability": "view"
+        },
+        {
+          "type": "impl",
+          "name": "WorldProviderImpl",
+          "interface_name": "dojo::contract::components::world_provider::IWorldProvider"
+        },
+        {
+          "type": "struct",
+          "name": "dojo::world::iworld::IWorldDispatcher",
+          "members": [
+            {
+              "name": "contract_address",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::world_provider::IWorldProvider",
+          "items": [
+            {
+              "type": "function",
+              "name": "world_dispatcher",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "dojo::world::iworld::IWorldDispatcher"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "UpgradeableImpl",
+          "interface_name": "dojo::contract::components::upgradeable::IUpgradeable"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::upgradeable::IUpgradeable",
+          "items": [
+            {
+              "type": "function",
+              "name": "upgrade",
+              "inputs": [
+                {
+                  "name": "new_class_hash",
+                  "type": "core::starknet::class_hash::ClassHash"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "constructor",
+          "name": "constructor",
+          "inputs": []
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+          "kind": "struct",
+          "members": [
+            {
+              "name": "class_hash",
+              "type": "core::starknet::class_hash::ClassHash",
+              "kind": "data"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "Upgraded",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+              "kind": "nested"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "nothing_game::systems::item::item_system::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "UpgradeableEvent",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+              "kind": "nested"
+            },
+            {
+              "name": "WorldProviderEvent",
+              "type": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+              "kind": "nested"
+            }
+          ]
+        }
+      ],
+      "init_calldata": [],
+      "tag": "nothing_game-item_system",
+      "selector": "0x613fb3d7b01d079bedf3d4d5b3c8c930f4aca329c3632369a1126bcf88dfffc",
+      "systems": [
+        "add_item",
+        "upgrade"
+      ]
+    },
+    {
+      "address": "0x9db9c315c1392c7c1590bbb18b657b4aee06ddf0351cdb94a6b355cc09f425",
+      "class_hash": "0x1bdf8c1ebee2bdc78bfb2711406b7291576d84e17f4b3440a7835792033ae12",
+      "abi": [
+        {
+          "type": "impl",
+          "name": "shop_system__ContractImpl",
+          "interface_name": "dojo::contract::interface::IContract"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::interface::IContract",
+          "items": []
+        },
+        {
+          "type": "impl",
+          "name": "shop_system__DeployedContractImpl",
+          "interface_name": "dojo::meta::interface::IDeployedResource"
+        },
+        {
+          "type": "struct",
+          "name": "core::byte_array::ByteArray",
+          "members": [
+            {
+              "name": "data",
+              "type": "core::array::Array::<core::bytes_31::bytes31>"
+            },
+            {
+              "name": "pending_word",
+              "type": "core::felt252"
+            },
+            {
+              "name": "pending_word_len",
+              "type": "core::integer::u32"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::meta::interface::IDeployedResource",
+          "items": [
+            {
+              "type": "function",
+              "name": "dojo_name",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "ShopImpl",
+          "interface_name": "nothing_game::systems::shop::IShop"
+        },
+        {
+          "type": "interface",
+          "name": "nothing_game::systems::shop::IShop",
+          "items": [
+            {
+              "type": "function",
+              "name": "reroll_shop",
+              "inputs": [],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "function",
+          "name": "dojo_init",
+          "inputs": [],
+          "outputs": [],
+          "state_mutability": "view"
+        },
+        {
+          "type": "impl",
+          "name": "WorldProviderImpl",
+          "interface_name": "dojo::contract::components::world_provider::IWorldProvider"
+        },
+        {
+          "type": "struct",
+          "name": "dojo::world::iworld::IWorldDispatcher",
+          "members": [
+            {
+              "name": "contract_address",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::world_provider::IWorldProvider",
+          "items": [
+            {
+              "type": "function",
+              "name": "world_dispatcher",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "dojo::world::iworld::IWorldDispatcher"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "UpgradeableImpl",
+          "interface_name": "dojo::contract::components::upgradeable::IUpgradeable"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::upgradeable::IUpgradeable",
+          "items": [
+            {
+              "type": "function",
+              "name": "upgrade",
+              "inputs": [
+                {
+                  "name": "new_class_hash",
+                  "type": "core::starknet::class_hash::ClassHash"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "constructor",
+          "name": "constructor",
+          "inputs": []
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+          "kind": "struct",
+          "members": [
+            {
+              "name": "class_hash",
+              "type": "core::starknet::class_hash::ClassHash",
+              "kind": "data"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "Upgraded",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+              "kind": "nested"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "nothing_game::systems::shop::shop_system::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "UpgradeableEvent",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+              "kind": "nested"
+            },
+            {
+              "name": "WorldProviderEvent",
+              "type": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+              "kind": "nested"
+            }
+          ]
+        }
+      ],
+      "init_calldata": [],
+      "tag": "nothing_game-shop_system",
+      "selector": "0x27000bdc93577e0c7338937caec544492b63f9f03076ef75972f287fe8457f",
+      "systems": [
+        "reroll_shop",
         "upgrade"
       ]
     }
@@ -1480,29 +1931,53 @@
   "models": [
     {
       "members": [],
-      "class_hash": "0x7deb48ccf95cc441a0489cfefdae54aeb6f8ec462ba13ff25e23f080e66cc2f",
-      "tag": "dojo_starter-DirectionsAvailable",
-      "selector": "0x77844f1facb51e60e546a9832d56c6bd04fa23be4fd5b57290caae5e9a3c1e4"
+      "class_hash": "0x7bdee740af87d44878e67508856df4a100201529aae9038e180c944c4217444",
+      "tag": "nothing_game-BackpackGrid",
+      "selector": "0x85dfe8105392fecafc08fd9d905a7f3728dd8488a883b5b22cf5f098a204e0"
     },
     {
       "members": [],
-      "class_hash": "0x70edf8f3be0b118e78f856f3ea9ebb652cba3684abaf7f299bfa6f93bf907c9",
-      "tag": "dojo_starter-Moves",
-      "selector": "0x2a29373f1af8348bd366a990eb3a342ef2cbe5e85160539eaca3441a673f468"
+      "class_hash": "0x3d87ad27a2f2bda226403cafc7d179e7711c7e7fa621a3a8937918a9063fcd1",
+      "tag": "nothing_game-Character",
+      "selector": "0x7f3beff9a71e5860df103ec7dbe745c78f81f96a0d8f686f060e0a1725d79a2"
     },
     {
       "members": [],
-      "class_hash": "0x2283c68ecba5c60bbbbd3b00659808a02244468e41a1d2cdba1312d65b83594",
-      "tag": "dojo_starter-Position",
-      "selector": "0x2ac8b4c190f7031b9fc44312e6b047a1dce0b3f2957c33a935ca7846a46dd5b"
+      "class_hash": "0x466747445465d04003292408b15489d63c88c74bf58326b1ee6181a2d16283a",
+      "tag": "nothing_game-CharacterItem",
+      "selector": "0x7ed6ba5b3e4a86e855904e60b52b3952819df8325a254ca69b7fac78f5fa610"
+    },
+    {
+      "members": [],
+      "class_hash": "0x4109ab4d4c724095ae398315f1bda94021b53f89919a5ab0412d69a6634d9c",
+      "tag": "nothing_game-CharacterItemRegistry",
+      "selector": "0x4e2cd035dd583c22010a42babdf459d17c4ce103f4b473a8a5c34018692723"
+    },
+    {
+      "members": [],
+      "class_hash": "0x3e79b85a248af3fa5b9dc24eadd7f9126e8cc1bc88f407d7142828f3f642cfa",
+      "tag": "nothing_game-Item",
+      "selector": "0x63ebd6a2115492bf4f7e75a088e571180a94f9a00cab3bd8168f3d4502e8698"
+    },
+    {
+      "members": [],
+      "class_hash": "0x5c226f27c258ee540aa0cb7bfef32eeab9a27490010c5104c4df23575780f20",
+      "tag": "nothing_game-ItemRegistry",
+      "selector": "0x508703c7e4430f354ca1834f30c9fce3d5182caceda2f0ff9ab2a27c1780d83"
+    },
+    {
+      "members": [],
+      "class_hash": "0x59e533c4cf2858d47164fe5e2c24fb0f387fb18f017aa883755ea634b865d1d",
+      "tag": "nothing_game-Shop",
+      "selector": "0x762b0163638706dcfdcc101bb2ed740f0cba6bb0ad7a78d1b4791d5b076bb13"
     }
   ],
   "events": [
     {
       "members": [],
-      "class_hash": "0x5be0a05a5df3bd3b4fc17f8b1feb395cb463ced20ea41d4fbb9b86a4d7efc66",
-      "tag": "dojo_starter-Moved",
-      "selector": "0x504403e5c02b6442527721fc464d9ea5fc8f1ee600ab5ccd5c0845d36fd45f1"
+      "class_hash": "0x2268710c5f79edc791673dcfed1b2faa92ecfdd766e24cc1bc960b472e13476",
+      "tag": "nothing_game-BuyItem",
+      "selector": "0x4ed0ef4495551784cbf8dbc22b91f4ce5e84b86ff1db866537c7e3b543189cb"
     }
   ]
 }
