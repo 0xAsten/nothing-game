@@ -9,6 +9,7 @@ sierra-replace-ids = true
 [scripts]
 migrate = "sozo build && sozo migrate"                      # scarb run migrate
 spawn = "sozo execute nothing_game-character_system spawn --wait"    # scarb run spawn
+reroll = "sozo execute nothing_game-shop_system reroll_shop --wait" # scarb run reroll
 # move = "sozo execute nothing_game-character_system move -c 1 --wait" # scarb run move
 
 [dependencies]
