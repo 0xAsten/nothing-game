@@ -11,7 +11,4 @@ struct BackpackGrid {
     y: u8,
     enabled: bool,
     occupied: bool,
-    slot_id: u32,
-    item_id: u32,
-    stack_group_id: u8,
 }

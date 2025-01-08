@@ -14,12 +14,13 @@ struct CharacterItem {
     #[key]
     slot_id: u32,
     item_id: u32,
+    item_type: u8,
     position: Position,
     // 0=0, 1=90, 2=180, 3=270
     rotation: u8,
+    stack_group_id: u8,
     effect_applied: bool,
     owned: Array<(u8, u8)>,
-    neighbors: Array<(u8, u8)>,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]

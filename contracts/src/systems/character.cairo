@@ -13,10 +13,10 @@ mod character_system {
 
     use nothing_game::models::{
         CharacterItem::{CharacterItemRegistry, CharacterItem, Position}, Item::{Item, ItemRegistry},
-        Shop::Shop, BackpackGrid::BackpackGrid, Character::Character,
+        Shop::Shop, Character::Character, BackpackGrid::BackpackGrid,
     };
     use nothing_game::constants::constants::{INIT_GOLD, GRID_X, GRID_Y};
-    use nothing_game::utils::grids::get_neighbors;
+    use nothing_game::utils::grids::{rectangles_overlap, rectangles_adjacent};
 
     use dojo::model::{ModelStorage, ModelValueStorage};
 
@@ -92,147 +92,133 @@ mod character_system {
             assert(xMax < GRID_X, 'item out of bound for x');
             assert(yMax < GRID_Y, 'item out of bound for y');
 
-            // put the item into inventory
-            let mut item_registry: CharacterItemRegistry = world.read_model(player);
-            let mut count = item_registry.next_slot_id;
-
-            // get all the neighbors of the item
-            let neighbors = get_neighbors(x, y, xMax, yMax, GRID_X, GRID_Y);
+            // check if the item can be placed in the backpack
+            // loop each grid of the item
+            loop {
+                let mut cx = x;
+                if cx > xMax {
+                    break;
+                }
+                loop {
+                    let mut cy = y;
+                    if cy > yMax {
+                        break;
+                    }
+                    let mut backpack_grid: BackpackGrid = world.read_model((player, cx, cy));
+                    if item.item_type != 4 {
+                        assert(backpack_grid.enabled == true, 'Grid is not enabled');
+                        assert(backpack_grid.occupied == false, 'Grid is occupied');
+                        backpack_grid.occupied = true;
+                        world.write_model(@backpack_grid);
+                    } else {
+                        assert(backpack_grid.enabled == false, 'Grid is enabled');
+                        backpack_grid.enabled = true;
+                        world.write_model(@backpack_grid);
+                    }
+                    cy += 1;
+                };
+                cx += 1;
+            };
 
             let mut character_item = CharacterItem {
                 player,
                 slot_id: 0,
                 item_id,
+                item_type: item.item_type,
                 position: Position { x, y },
                 rotation: rotation,
+                stack_group_id: item.stack_group_id,
                 effect_applied: false,
                 owned: array![(x, y), (xMax, yMax)],
-                neighbors: neighbors,
             };
 
+            let mut item_registry: CharacterItemRegistry = world.read_model(player);
+            let mut count = item_registry.next_slot_id;
+
+            // Check for placement conflicts with existing items
+            if character_item.item_type != 4 {
+                loop {
+                    if count == 0 {
+                        break;
+                    }
+
+                    let mut current_character_item: CharacterItem = world
+                        .read_model((player, count));
+                    if current_character_item.item_id != 0
+                        && current_character_item.item_type != 4 {
+                        // Get corners of current item's rectangle
+                        let (curr_x1, curr_y1) = *current_character_item.owned.at(0);
+                        let (curr_x2, curr_y2) = *current_character_item.owned.at(1);
+
+                        assert(
+                            !rectangles_overlap(
+                                x, y, xMax, yMax, curr_x1, curr_y1, curr_x2, curr_y2,
+                            ),
+                            'placement conflict',
+                        );
+
+                        // To apply the accessory effect, the item must be adjacent to an item
+                        // with the same stack group id
+                        if (character_item.item_type == 3
+                            && current_character_item.item_type != 3
+                            && character_item.effect_applied == false
+                            && character_item
+                                .stack_group_id == current_character_item
+                                .stack_group_id) {
+                            let adjacent = rectangles_adjacent(
+                                x, y, xMax, yMax, curr_x1, curr_y1, curr_x2, curr_y2,
+                            );
+                            if adjacent {
+                                character_item.effect_applied = true;
+
+                                character.attack += item.attack;
+                                character.defense += item.defense;
+                                character.health += item.health;
+                            }
+                        } else if (character_item.item_type != 3
+                            && current_character_item.item_type == 3
+                            && current_character_item.effect_applied == false
+                            && character_item
+                                .stack_group_id == current_character_item
+                                .stack_group_id) {
+                            let adjacent = rectangles_adjacent(
+                                x, y, xMax, yMax, curr_x1, curr_y1, curr_x2, curr_y2,
+                            );
+                            if adjacent {
+                                current_character_item.effect_applied = true;
+
+                                let current_item: Item = world
+                                    .read_model(current_character_item.item_id);
+                                character.attack += current_item.attack;
+                                character.defense += current_item.defense;
+                                character.health += current_item.health;
+
+                                world.write_model(@current_character_item);
+                            }
+                        }
+                    }
+
+                    count -= 1;
+                };
+            }
+
+            // put the item into inventory
+            count = item_registry.next_slot_id;
             loop {
                 if count == 0 {
                     break;
                 }
-
                 let current_character_item: CharacterItem = world.read_model((player, count));
                 if current_character_item.item_id == 0 {
                     character_item.slot_id = count;
                     break;
                 }
-
                 count -= 1;
             };
-
             if count == 0 {
                 item_registry.next_slot_id += 1;
                 character_item.slot_id = item_registry.next_slot_id;
             }
-
-            // put the item into backpack
-            let mut i = x;
-            let mut j = y;
-            loop {
-                if i > xMax {
-                    break;
-                }
-                loop {
-                    if j > yMax {
-                        break;
-                    }
-
-                    let grid: BackpackGrid = world.read_model((player, i, j));
-                    if item.item_type == 4 {
-                        assert(!grid.enabled, 'Already has a bag');
-                        world
-                            .write_model(
-                                @BackpackGrid {
-                                    player: player,
-                                    x: i,
-                                    y: j,
-                                    enabled: true,
-                                    occupied: false,
-                                    slot_id: 0,
-                                    item_id: 0,
-                                    stack_group_id: 0,
-                                },
-                            );
-                    } else {
-                        assert(grid.enabled, 'Dont have a bag');
-                        assert(!grid.occupied, 'Already occupied');
-                        // stack_group_id of a grid is the same as the item's stack_group_id if the
-                        // item is not an accessory
-                        let stack_group_id = if item.item_type != 3 {
-                            // apply stacking effect
-                            character.attack += item.attack;
-                            character.defense += item.defense;
-                            character.health += item.health;
-                            item.stack_group_id
-                        } else {
-                            0
-                        };
-                        world
-                            .write_model(
-                                @BackpackGrid {
-                                    player: player,
-                                    x: i,
-                                    y: j,
-                                    enabled: true,
-                                    occupied: true,
-                                    slot_id: character_item.slot_id,
-                                    item_id: item_id,
-                                    stack_group_id: stack_group_id,
-                                },
-                            );
-
-                        // apply effect if the item is an accessory
-                        if !character_item.effect_applied && item.item_type == 3 {
-                            // left
-                            if i > 0 && i == x && !character_item.effect_applied {
-                                let grid: BackpackGrid = world.read_model((player, i - 1, j));
-                                if grid.stack_group_id == item.stack_group_id {
-                                    character_item.effect_applied = true;
-                                }
-                            }
-                            // top
-                            if j < GRID_Y - 1 && j == yMax && !character_item.effect_applied {
-                                let grid: BackpackGrid = world.read_model((player, i, j + 1));
-                                if grid.stack_group_id == item.stack_group_id {
-                                    character_item.effect_applied = true;
-                                }
-                            }
-                            // right
-                            if i < GRID_X - 1 && i == xMax && !character_item.effect_applied {
-                                let grid: BackpackGrid = world.read_model((player, i + 1, j));
-                                if grid.stack_group_id == item.stack_group_id {
-                                    character_item.effect_applied = true;
-                                }
-                            }
-                            // bottom
-                            if j > 0 && j == y && !character_item.effect_applied {
-                                let grid: BackpackGrid = world.read_model((player, i, j - 1));
-                                if grid.stack_group_id == item.stack_group_id {
-                                    character_item.effect_applied = true;
-                                }
-                            }
-                            // apply effect
-                            if character_item.effect_applied {
-                                match item.special_effect {
-                                    0 => assert(false, 'invalid special effect'),
-                                    1 => character.attack += item.special_effect_stacks,
-                                    2 => character.defense += item.special_effect_stacks,
-                                    3 => character.health += item.special_effect_stacks,
-                                    _ => assert(false, 'invalid special effect'),
-                                }
-                            }
-                        }
-                    }
-
-                    j += 1;
-                };
-                j = y;
-                i += 1;
-            };
 
             world.write_model(@character_item);
             world.write_model(@item_registry);
@@ -245,82 +231,142 @@ mod character_system {
 
             let player = get_caller_address();
 
-            let mut character: Character = world.read_model(player);
-
             let mut character_item: CharacterItem = world.read_model((player, slot_id));
             assert(character_item.item_id != 0, 'item not exists');
 
-            let item: Item = world.read_model(character_item.item_id);
+            let (x, y) = *character_item.owned.at(0);
+            let (xMax, yMax) = *character_item.owned.at(1);
 
-            // remove the item from backpack
-            let mut xMax = 0;
-            let mut yMax = 0;
+            let mut character: Character = world.read_model(player);
+            let item_registry: CharacterItemRegistry = world.read_model(player);
 
-            if character_item.rotation == 0 || character_item.rotation == 2 {
-                // only check grids which are above the starting (x,y)
-                xMax = character_item.position.x + item.width - 1;
-                yMax = character_item.position.y + item.height - 1;
-            } else if character_item.rotation == 1 || character_item.rotation == 3 {
-                // only check grids which are to the right of the starting (x,y)
-                //item_h becomes item_w and vice versa
-                xMax = character_item.position.x + item.height - 1;
-                yMax = character_item.position.y + item.width - 1;
-            } else {
-                assert(false, 'invalid rotation');
-            }
+            // If this is an accessory with applied effect, remove the effect
+            if character_item.item_type == 3 && character_item.effect_applied {
+                let item: Item = world.read_model(character_item.item_id);
 
-            let mut i = character_item.position.x;
-            let mut j = character_item.position.y;
-            loop {
-                if i > xMax {
-                    break;
-                }
-                loop {
-                    if j > yMax {
-                        break;
-                    }
-
-                    let mut grid: BackpackGrid = world.read_model((player, i, j));
-                    if item.item_type == 4 {
-                        assert(!grid.occupied, 'Bag is used');
-                        grid.enabled = false;
-                        grid.stack_group_id = 0;
-                        world.write_model(@grid);
-                    } else {
-                        assert(grid.occupied, 'No item');
-                        assert(grid.item_id == character_item.item_id, 'Item id mismatch');
-                        assert(grid.slot_id == character_item.slot_id, 'Slot id mismatch');
-
-                        grid.occupied = false;
-                        grid.slot_id = 0;
-                        grid.item_id = 0;
-                        grid.stack_group_id = 0;
-                        world.write_model(@grid);
-                    }
-                }
-            };
-
-            // unapply effect
-            if item.item_type == 3 {
-                match item.special_effect {
-                    0 => assert(false, 'invalid special effect'),
-                    1 => character.attack -= item.special_effect_stacks,
-                    2 => character.defense -= item.special_effect_stacks,
-                    3 => character.health -= item.special_effect_stacks,
-                    _ => assert(false, 'invalid special effect'),
-                }
-            } else if item.item_type != 4 {
                 character.attack -= item.attack;
                 character.defense -= item.defense;
                 character.health -= item.health;
+            } // If this is not an accessory find the accessories next to it and check if they have
+            // the same stack group id If they do, remove the effect
+            // and to make sure the accessory isn't adjacent to another armor/weapon with the same
+            // stack group id
+            else if character_item.item_type != 3 && character_item.item_type != 4 {
+                let mut count1 = item_registry.next_slot_id;
+                let mut count2 = item_registry.next_slot_id;
+                loop {
+                    if count1 == 0 {
+                        break;
+                    }
+
+                    if count1 == slot_id {
+                        count1 -= 1;
+                        continue;
+                    }
+
+                    let around_character_item_1: CharacterItem = world.read_model((player, count1));
+                    if around_character_item_1.item_type == 3
+                        && around_character_item_1.effect_applied
+                        && character_item.stack_group_id == around_character_item_1.stack_group_id {
+                        let (curr_x1, curr_y1) = *around_character_item_1.owned.at(0);
+                        let (curr_x2, curr_y2) = *around_character_item_1.owned.at(1);
+                        let adjacent = rectangles_adjacent(
+                            x, y, xMax, yMax, curr_x1, curr_y1, curr_x2, curr_y2,
+                        );
+                        if adjacent {
+                            let mut is_adjacent = false;
+                            loop {
+                                if count2 == 0 {
+                                    break;
+                                }
+
+                                if count2 == slot_id || count2 == count1 {
+                                    count2 -= 1;
+                                    continue;
+                                }
+
+                                let around_character_item_2: CharacterItem = world
+                                    .read_model((player, count2));
+                                if around_character_item_2.item_type != 3
+                                    && around_character_item_2.item_type != 4
+                                    && around_character_item_2
+                                        .stack_group_id == around_character_item_1
+                                        .stack_group_id {
+                                    let (around_x1, around_y1) = *around_character_item_2
+                                        .owned
+                                        .at(0);
+                                    let (around_x2, around_y2) = *around_character_item_2
+                                        .owned
+                                        .at(1);
+                                    let adjacent = rectangles_adjacent(
+                                        curr_x1,
+                                        curr_y1,
+                                        curr_x2,
+                                        curr_y2,
+                                        around_x1,
+                                        around_y1,
+                                        around_x2,
+                                        around_y2,
+                                    );
+                                    if adjacent {
+                                        is_adjacent = true;
+                                        break;
+                                    }
+                                }
+
+                                count2 -= 1;
+                            }
+
+                            if !is_adjacent {
+                                let item: Item = world.read_model(around_character_item_1.item_id);
+                                character.attack -= item.attack;
+                                character.defense -= item.defense;
+                                character.health -= item.health;
+                            }
+                        }
+                    }
+
+                    count1 -= 1;
+                }
             }
+            // If this is a bag item, disable the grids it enabled
+            loop {
+                let mut cx = x;
+                if cx > xMax {
+                    break;
+                }
+                loop {
+                    let mut cy = y;
+                    if cy > yMax {
+                        break;
+                    }
+                    let mut backpack_grid: BackpackGrid = world.read_model((player, cx, cy));
+                    if character_item.item_type != 4 {
+                        assert(backpack_grid.occupied == true, 'Grid is not occupied');
+                        backpack_grid.occupied = false;
+                        world.write_model(@backpack_grid);
+                    } else {
+                        assert(backpack_grid.occupied == false, 'Grid is occupied');
+                        assert(backpack_grid.enabled == true, 'Grid is not enabled');
+                        backpack_grid.enabled = false;
+                        world.write_model(@backpack_grid);
+                    }
+                    cy += 1;
+                };
+                cx += 1;
+            };
 
             // remove the item from inventory
             character_item.item_id = 0;
+            character_item.item_type = 0;
             character_item.position = Position { x: 0, y: 0 };
             character_item.rotation = 0;
+            character_item.stack_group_id = 0;
             character_item.effect_applied = false;
+            character_item.owned = array![(0, 0), (0, 0)];
 
+            // Mark the item as removed
+            character_item.item_id = 0;
             world.write_model(@character_item);
             world.write_model(@character);
         }
