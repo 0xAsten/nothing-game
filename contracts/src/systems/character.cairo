@@ -220,6 +220,10 @@ mod character_system {
                 character_item.slot_id = item_registry.next_slot_id;
             }
 
+            character.attack += item.attack;
+            character.defense += item.defense;
+            character.health += item.health;
+
             world.write_model(@character_item);
             world.write_model(@item_registry);
             world.write_model(@character);
@@ -315,7 +319,7 @@ mod character_system {
                                 }
 
                                 count2 -= 1;
-                            }
+                            };
 
                             if !is_adjacent {
                                 let item: Item = world.read_model(around_character_item_1.item_id);
@@ -364,6 +368,10 @@ mod character_system {
             character_item.stack_group_id = 0;
             character_item.effect_applied = false;
             character_item.owned = array![(0, 0), (0, 0)];
+
+            character.attack -= item.attack;
+            character.defense -= item.defense;
+            character.health -= item.health;
 
             // Mark the item as removed
             character_item.item_id = 0;

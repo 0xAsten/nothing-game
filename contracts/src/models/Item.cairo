@@ -23,6 +23,11 @@ pub struct Item {
     pub special_effect: u8,
     pub special_effect_stacks: u32,
     // Stack group ID (items with same group ID trigger stacking effects)
+    // 1 = Warrior (Physical damage and defense)
+    // 2 = Ranger (Speed and precision)
+    // 3 = Mage (Magical power)
+    // 4 = Knight (Heavy defense)
+    // 5 = Assassin (Critical strikes)
     pub stack_group_id: u8,
 }
 
