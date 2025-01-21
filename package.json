@@ -1,0 +1,9 @@
+{
+  "name": "nothing-game",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter client dev",
+    "contracts:test": "pnpm --filter contracts test",
+    "contracts:deploy": "pnpm --filter contracts deploy"
+  }
+}
