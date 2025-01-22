@@ -1,111 +1,173 @@
-'use client';
+'use client'
 
-import { useState, useCallback } from 'react';
-import Grid from '@/components/Grid';
-import Shop from '@/components/Shop';
-import { GameState, Item, GridPosition, PlacedItem } from '@/types/game';
-import { INITIAL_PLAYER_STATS, SAMPLE_ITEMS, REROLL_COST } from '@/constants/gameData';
+import React from 'react'
+import Grid from '@/components/Grid'
+import Shop from '@/components/Shop'
+import {
+  INITIAL_PLAYER_STATS,
+  SAMPLE_ITEMS,
+  REROLL_COST,
+} from '@/constants/gameData'
+import { GameState, Item, GridPosition, ItemType } from '@/types/game'
+import { validatePlacement, calculateSpecialEffects } from '@/utils/gridUtils'
 
 export default function Home() {
-  const [gameState, setGameState] = useState<GameState>({
+  const [gameState, setGameState] = React.useState<GameState>({
     playerStats: INITIAL_PLAYER_STATS,
     inventory: [],
     shopItems: SAMPLE_ITEMS.slice(0, 4),
-  });
+    selectedItem: undefined,
+    previewPosition: undefined,
+    previewRotation: 0,
+  })
 
-  const [draggedItem, setDraggedItem] = useState<Item | null>(null);
+  const handleReroll = () => {
+    if (gameState.playerStats.gold < REROLL_COST) return
 
-  const handleReroll = useCallback(() => {
-    if (gameState.playerStats.gold >= REROLL_COST) {
-      setGameState(prev => ({
-        ...prev,
-        playerStats: {
-          ...prev.playerStats,
-          gold: prev.playerStats.gold - REROLL_COST
-        },
-        shopItems: [...SAMPLE_ITEMS].sort(() => Math.random() - 0.5).slice(0, 4)
-      }));
-    }
-  }, [gameState.playerStats.gold]);
-
-  const handleDragStart = useCallback((item: Item) => {
-    setDraggedItem(item);
-  }, []);
-
-  const handleDrop = useCallback((position: GridPosition) => {
-    if (!draggedItem || gameState.playerStats.gold < draggedItem.price) {
-      return;
-    }
-
-    const newItem: PlacedItem = {
-      ...draggedItem,
-      position,
-      rotation: 0,
-    };
-
-    setGameState(prev => ({
+    setGameState((prev) => ({
       ...prev,
       playerStats: {
         ...prev.playerStats,
-        gold: prev.playerStats.gold - draggedItem.price,
-        attack: prev.playerStats.attack + draggedItem.attack,
-        defense: prev.playerStats.defense + draggedItem.defense,
-        health: prev.playerStats.health + draggedItem.health,
+        gold: prev.playerStats.gold - REROLL_COST,
       },
-      inventory: [...prev.inventory, newItem],
-    }));
+      shopItems: SAMPLE_ITEMS.sort(() => Math.random() - 0.5).slice(0, 4),
+    }))
+  }
 
-    setDraggedItem(null);
-  }, [draggedItem, gameState.playerStats.gold]);
+  const handleDragStart = (item: Item) => {
+    setGameState((prev) => ({
+      ...prev,
+      selectedItem: item,
+    }))
+  }
 
-  const handleDragOver = useCallback((position: GridPosition) => {
-    // Implement preview logic here
-  }, []);
+  const handleDragOver = (position: GridPosition) => {
+    setGameState((prev) => ({
+      ...prev,
+      previewPosition: position,
+    }))
+  }
+
+  const handleRotate = () => {
+    if (!gameState.selectedItem) return
+
+    setGameState((prev) => ({
+      ...prev,
+      previewRotation: (((prev.previewRotation || 0) + 90) % 360) as
+        | 0
+        | 90
+        | 180
+        | 270,
+    }))
+  }
+
+  const handleDrop = (position: GridPosition) => {
+    const { selectedItem, inventory, previewRotation } = gameState
+    if (!selectedItem) return
+
+    // Check if this is a bag and if there are non-bag items already placed
+    if (
+      selectedItem.item_type === ItemType.BAG &&
+      inventory.some((item) => item.item_type !== ItemType.BAG)
+    ) {
+      return // Cannot place bags after other items
+    }
+
+    const validation = validatePlacement(
+      selectedItem,
+      position,
+      previewRotation || 0,
+      inventory,
+    )
+
+    if (!validation.isValid) return
+
+    const newItem = {
+      ...selectedItem,
+      position,
+      rotation: previewRotation || 0,
+    }
+
+    setGameState((prev) => {
+      const newInventory = [...prev.inventory, newItem]
+      const specialEffects = calculateSpecialEffects(newInventory)
+
+      return {
+        ...prev,
+        inventory: newInventory,
+        playerStats: {
+          ...prev.playerStats,
+          gold: prev.playerStats.gold - selectedItem.price,
+          attack: INITIAL_PLAYER_STATS.attack + specialEffects.attack,
+          defense: INITIAL_PLAYER_STATS.defense + specialEffects.defense,
+          health: INITIAL_PLAYER_STATS.health + specialEffects.health,
+        },
+        selectedItem: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      }
+    })
+  }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Grid Equipment Game</h1>
-        
-        <div className="flex flex-wrap gap-4 mb-8">
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm flex items-center gap-2">
-            <span className="text-amber-500 font-medium">{gameState.playerStats.gold}</span>
-            <span className="text-gray-600">Gold</span>
-          </div>
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm flex items-center gap-2">
-            <span className="text-red-500 font-medium">{gameState.playerStats.attack}</span>
-            <span className="text-gray-600">Attack</span>
-          </div>
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm flex items-center gap-2">
-            <span className="text-blue-500 font-medium">{gameState.playerStats.defense}</span>
-            <span className="text-gray-600">Defense</span>
-          </div>
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm flex items-center gap-2">
-            <span className="text-green-500 font-medium">{gameState.playerStats.health}</span>
-            <span className="text-gray-600">Health</span>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Inventory</h2>
+    <main className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg p-4 shadow-sm mb-8">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Player Stats
+                </h2>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-500 font-medium">
+                      {gameState.playerStats.gold}
+                    </span>
+                    <span className="text-gray-600">Gold</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-500 font-medium">
+                      {gameState.playerStats.attack}
+                    </span>
+                    <span className="text-gray-600">ATK</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-500 font-medium">
+                      {gameState.playerStats.defense}
+                    </span>
+                    <span className="text-gray-600">DEF</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-500 font-medium">
+                      {gameState.playerStats.health}
+                    </span>
+                    <span className="text-gray-600">HP</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             <Grid
               items={gameState.inventory}
+              selectedItem={gameState.selectedItem}
+              previewPosition={gameState.previewPosition}
+              previewRotation={gameState.previewRotation}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
+              onRotate={handleRotate}
             />
           </div>
-          
           <div>
             <Shop
               items={gameState.shopItems}
               gold={gameState.playerStats.gold}
               onReroll={handleReroll}
               onDragStart={handleDragStart}
+              onPurchase={() => {}}
             />
           </div>
         </div>
       </div>
     </main>
-  );
+  )
 }

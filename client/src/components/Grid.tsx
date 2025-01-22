@@ -1,86 +1,144 @@
-import React from 'react';
-import Image from 'next/image';
-import { GRID_WIDTH, GRID_HEIGHT } from '@/constants/gameData';
-import { PlacedItem, GridPosition } from '@/types/game';
+import React from 'react'
+import Image from 'next/image'
+import { GRID_WIDTH, GRID_HEIGHT } from '@/constants/gameData'
+import { PlacedItem, GridPosition, Item } from '@/types/game'
+import {
+  getOccupiedCells,
+  validatePlacement,
+  getRotatedDimensions,
+} from '@/utils/gridUtils'
 
 interface GridProps {
-  items: PlacedItem[];
-  onDrop: (position: GridPosition) => void;
-  onDragOver: (position: GridPosition) => void;
+  items: PlacedItem[]
+  selectedItem?: Item
+  previewPosition?: GridPosition
+  previewRotation?: 0 | 90 | 180 | 270
+  onDrop: (position: GridPosition) => void
+  onDragOver: (position: GridPosition) => void
+  onRotate: () => void
 }
 
-const Grid: React.FC<GridProps> = ({ items, onDrop, onDragOver }) => {
+const Grid: React.FC<GridProps> = ({
+  items,
+  selectedItem,
+  previewPosition,
+  previewRotation,
+  onDrop,
+  onDragOver,
+  onRotate,
+}) => {
   const cells = Array.from({ length: GRID_HEIGHT }, (_, y) =>
-    Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y }))
-  );
+    Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
+  )
 
   const handleDragOver = (e: React.DragEvent, position: GridPosition) => {
-    e.preventDefault();
-    onDragOver(position);
-  };
+    e.preventDefault()
+    onDragOver(position)
+  }
 
   const handleDrop = (e: React.DragEvent, position: GridPosition) => {
-    e.preventDefault();
-    onDrop(position);
-  };
+    e.preventDefault()
+    onDrop(position)
+  }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'r' || e.key === 'R') {
+      onRotate()
+    }
+  }
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onRotate])
+
+  const renderItem = (item: PlacedItem) => {
+    const { width, height } = getRotatedDimensions(item, item.rotation)
+    const cellSize = 64 // Base cell size in pixels
+
+    return (
+      <div
+        key={`item-${item.item_id}-${item.position.x}-${item.position.y}`}
+        className={`absolute transition-all duration-200 ${
+          item.isValid === false ? 'opacity-50' : ''
+        }`}
+        style={{
+          left: `${item.position.x * cellSize}px`,
+          bottom: `${item.position.y * cellSize}px`,
+          width: `${width * cellSize}px`,
+          height: `${height * cellSize}px`,
+          transform: `rotate(${item.rotation}deg)`,
+          transformOrigin: 'bottom left',
+        }}
+      >
+        {item.image_url && (
+          <Image
+            src={item.image_url}
+            alt={item.name}
+            fill
+            className="object-contain"
+          />
+        )}
+      </div>
+    )
+  }
+
+  const renderPreview = () => {
+    if (!selectedItem || !previewPosition) return null
+
+    const previewItem: PlacedItem = {
+      ...selectedItem,
+      position: previewPosition,
+      rotation: previewRotation || 0,
+    }
+
+    const validation = validatePlacement(
+      previewItem,
+      previewPosition,
+      previewRotation || 0,
+      items,
+    )
+    previewItem.isValid = validation.isValid
+
+    return renderItem(previewItem)
+  }
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm">
-      <div className="relative" style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${GRID_WIDTH}, minmax(0, 1fr))`,
-        gap: '1px',
-        backgroundColor: '#e5e7eb',
-        padding: '1px',
-        borderRadius: '4px',
-      }}>
-        {cells.map((row, y) =>
-          row.map((cell, x) => (
-            <div
-              key={`${x}-${y}`}
-              className="aspect-square bg-white"
-              onDragOver={(e) => handleDragOver(e, { x, y })}
-              onDrop={(e) => handleDrop(e, { x, y })}
-            />
-          ))
-        )}
-        {items.map((item) => (
-          <div
-            key={`item-${item.item_id}-${item.position.x}-${item.position.y}`}
-            className="absolute"
-            style={{
-              left: `${(item.position.x / GRID_WIDTH) * 100}%`,
-              bottom: `${(item.position.y / GRID_HEIGHT) * 100}%`,
-              width: `${(item.width / GRID_WIDTH) * 100}%`,
-              height: `${(item.height / GRID_HEIGHT) * 100}%`,
-              transform: `rotate(${item.rotation}deg)`,
-            }}
-          >
-            <div className="w-full h-full relative bg-blue-50 border-2 border-blue-500 rounded p-1">
-              {item.image_url && (
-                <div className="absolute inset-0 p-2">
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              )}
-              <div className="absolute bottom-1 left-1 right-1">
-                <div className="text-sm font-medium text-gray-900 truncate">{item.name}</div>
-                <div className="flex gap-1 text-xs">
-                  {item.attack > 0 && <span className="text-red-500">+{item.attack}ATK</span>}
-                  {item.defense > 0 && <span className="text-blue-500">+{item.defense}DEF</span>}
-                  {item.health > 0 && <span className="text-green-500">+{item.health}HP</span>}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div
+        className="relative"
+        style={{
+          width: `${GRID_WIDTH * 64}px`,
+          height: `${GRID_HEIGHT * 64}px`,
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${GRID_WIDTH}, minmax(0, 1fr))`,
+            gap: '1px',
+            backgroundColor: '#e5e7eb',
+            padding: '1px',
+            borderRadius: '4px',
+          }}
+        >
+          {cells.map((row, y) =>
+            row.map((cell, x) => (
+              <div
+                key={`${x}-${y}`}
+                className="aspect-square bg-white hover:bg-gray-50"
+                onDragOver={(e) => handleDragOver(e, { x, y })}
+                onDrop={(e) => handleDrop(e, { x, y })}
+              />
+            )),
+          )}
+        </div>
+        {items.map(renderItem)}
+        {renderPreview()}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Grid;
+export default Grid
