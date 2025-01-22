@@ -15,7 +15,7 @@ mod character_system {
         CharacterItem::{CharacterItemRegistry, CharacterItem, Position}, Item::{Item, ItemRegistry},
         Shop::Shop, Character::Character, BackpackGrid::BackpackGrid,
     };
-    use nothing_game::constants::constants::{INIT_GOLD, GRID_X, GRID_Y};
+    use nothing_game::constants::constants::{INIT_GOLD, INIT_HEALTH, GRID_X, GRID_Y};
     use nothing_game::utils::grids::{rectangles_overlap, rectangles_adjacent};
 
     use dojo::model::{ModelStorage, ModelValueStorage};
@@ -38,7 +38,7 @@ mod character_system {
                         initialized: true,
                         attack: 0,
                         defense: 0,
-                        health: 0,
+                        health: INIT_HEALTH,
                     },
                 );
 

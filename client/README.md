@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grid Equipment Game
+
+A Next.js-based grid equipment management game where players can purchase and strategically place items in their inventory to enhance their character's stats.
+
+## Features
+
+- Grid-based inventory system with drag-and-drop functionality
+- Shop system with random items and reroll mechanism
+- Item placement rules and validation
+- Special effects system for item combinations
+- Real-time stat calculations
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to play the game.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Game Rules
 
-## Learn More
+### Inventory System
+- Grid coordinates start from (0,0) at bottom-left
+- Items can be dragged from shop to inventory
+- Items can be repositioned within inventory
+- Items can be discarded by dragging out of inventory
 
-To learn more about Next.js, take a look at the following resources:
+### Item Placement Rules
+- All items must be placed within grid boundaries
+- Items cannot overlap
+- Non-bag items must be placed in areas covered by bags
+- Items can be rotated (0°, 90°, 180°, 270°)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Shop System
+- Displays 4 random items
+- Reroll costs 10 gold
+- Items can be purchased by dragging to inventory
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Special Effects
+- Accessories activate when placed adjacent to compatible items
+- Effects stack based on item properties
+- Real-time stat updates when effects activate
 
-## Deploy on Vercel
+## Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 13+ with App Router
+- TypeScript
+- Tailwind CSS
+- React DnD (for drag and drop)
