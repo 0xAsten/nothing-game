@@ -12,6 +12,15 @@ export enum SpecialEffect {
   HEALTH = 3,
 }
 
+export enum StackGroup {
+  NONE = 0,
+  WARRIOR = 1,
+  RANGER = 2,
+  MAGE = 3,
+  KNIGHT = 4,
+  ASSASSIN = 5,
+}
+
 export interface Item {
   item_id: number
   name: string

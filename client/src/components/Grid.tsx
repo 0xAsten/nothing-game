@@ -86,6 +86,8 @@ const Grid: React.FC<GridProps> = ({
   const renderPreview = () => {
     if (!selectedItem || !previewPosition) return null
 
+    console.log('renderPreview', previewPosition)
+
     const previewItem: PlacedItem = {
       ...selectedItem,
       position: previewPosition,
@@ -123,14 +125,20 @@ const Grid: React.FC<GridProps> = ({
             borderRadius: '4px',
           }}
         >
+          {/* the value of y need to be reverse */}
           {cells.map((row, y) =>
             row.map((cell, x) => (
               <div
                 key={`${x}-${y}`}
                 className="aspect-square bg-white hover:bg-gray-50"
-                onDragOver={(e) => handleDragOver(e, { x, y })}
-                onDrop={(e) => handleDrop(e, { x, y })}
-              />
+                onDragOver={(e) =>
+                  handleDragOver(e, { x, y: GRID_HEIGHT - y - 1 })
+                }
+                onDrop={(e) => handleDrop(e, { x, y: GRID_HEIGHT - y - 1 })}
+              >
+                <span>{x}</span>
+                <span>{y}</span>
+              </div>
             )),
           )}
         </div>

@@ -15,7 +15,7 @@ export default function Home() {
   const [gameState, setGameState] = React.useState<GameState>({
     playerStats: INITIAL_PLAYER_STATS,
     inventory: [],
-    shopItems: SAMPLE_ITEMS.slice(0, 4),
+    shopItems: [],
     selectedItem: undefined,
     previewPosition: undefined,
     previewRotation: 0,
@@ -24,24 +24,38 @@ export default function Home() {
   const handleReroll = () => {
     if (gameState.playerStats.gold < REROLL_COST) return
 
+    const shopItems = Object.values(SAMPLE_ITEMS)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4)
+
     setGameState((prev) => ({
       ...prev,
       playerStats: {
         ...prev.playerStats,
         gold: prev.playerStats.gold - REROLL_COST,
       },
-      shopItems: SAMPLE_ITEMS.sort(() => Math.random() - 0.5).slice(0, 4),
+      shopItems: shopItems,
     }))
   }
 
-  const handleDragStart = (item: Item) => {
+  const handleDragStart = (item: Item, index: number) => {
     setGameState((prev) => ({
       ...prev,
       selectedItem: item,
     }))
   }
 
+  const handleDragEnd = () => {
+    setGameState((prev) => ({
+      ...prev,
+      selectedItem: undefined,
+      previewPosition: undefined,
+      previewRotation: 0,
+    }))
+  }
+
   const handleDragOver = (position: GridPosition) => {
+    // console.log('handleDragOver', position)
     setGameState((prev) => ({
       ...prev,
       previewPosition: position,
@@ -63,14 +77,30 @@ export default function Home() {
 
   const handleDrop = (position: GridPosition) => {
     const { selectedItem, inventory, previewRotation } = gameState
-    if (!selectedItem) return
+    if (!selectedItem) {
+      // Reset preview state even if no item is selected
+      setGameState((prev) => ({
+        ...prev,
+        selectedItem: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      }))
+      return
+    }
 
     // Check if this is a bag and if there are non-bag items already placed
     if (
       selectedItem.item_type === ItemType.BAG &&
       inventory.some((item) => item.item_type !== ItemType.BAG)
     ) {
-      return // Cannot place bags after other items
+      // Reset preview state when placement is invalid
+      setGameState((prev) => ({
+        ...prev,
+        selectedItem: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      }))
+      return
     }
 
     const validation = validatePlacement(
@@ -80,12 +110,21 @@ export default function Home() {
       inventory,
     )
 
-    if (!validation.isValid) return
+    if (!validation.isValid) {
+      // Reset preview state when placement is invalid
+      setGameState((prev) => ({
+        ...prev,
+        selectedItem: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      }))
+      return
+    }
 
     const newItem = {
       ...selectedItem,
       position,
-      rotation: previewRotation || 0,
+      rotation: (previewRotation || 0) as 0 | 90 | 180 | 270,
     }
 
     setGameState((prev) => {
@@ -164,6 +203,7 @@ export default function Home() {
               onReroll={handleReroll}
               onDragStart={handleDragStart}
               onPurchase={() => {}}
+              onDragEnd={handleDragEnd}
             />
           </div>
         </div>
