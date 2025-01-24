@@ -47,6 +47,10 @@ const Grid: React.FC<GridProps> = ({
 
   const renderItem = (item: PlacedItem) => {
     const cellSize = 64 // Base cell size in pixels
+    const { width, height } = getRotatedDimensions(item, item.rotation)
+
+    const originalWidth = item.width * cellSize
+    const originalHeight = item.height * cellSize
 
     return (
       <div
@@ -57,18 +61,24 @@ const Grid: React.FC<GridProps> = ({
         style={{
           left: `${item.position.x * cellSize}px`,
           bottom: `${item.position.y * cellSize}px`,
-          width: `${item.width * cellSize}px`,
-          height: `${item.height * cellSize}px`,
-          transform: `rotate(${item.rotation}deg)`,
+          width: `${width * cellSize}px`,
+          height: `${height * cellSize}px`,
         }}
       >
         {item.image_url && (
-          <Image
-            src={item.image_url}
-            alt={item.name}
-            fill
-            className="object-contain"
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <img
+              src={item.image_url}
+              alt={item.name}
+              style={{
+                width: originalWidth,
+                height: originalHeight,
+                transform: `rotate(${item.rotation}deg)`,
+                transformOrigin: 'center',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
         )}
       </div>
     )
@@ -106,12 +116,7 @@ const Grid: React.FC<GridProps> = ({
 
     const previewItem: PlacedItem = {
       ...selectedItem,
-      width: width,
-      height: height,
-      position: {
-        x: adjustedPosition.x,
-        y: adjustedPosition.y,
-      },
+      position: adjustedPosition,
       rotation: previewRotation || 0,
     }
 
