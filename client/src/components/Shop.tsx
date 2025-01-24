@@ -11,6 +11,7 @@ interface ShopProps {
   onDragStart: (item: Item, index: number) => void
   onPurchase: (item: Item) => void
   onDragEnd: () => void
+  onRotate: () => void
 }
 
 const Shop: React.FC<ShopProps> = ({
@@ -20,9 +21,11 @@ const Shop: React.FC<ShopProps> = ({
   onDragStart,
   onPurchase,
   onDragEnd,
+  onRotate,
 }) => {
   const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
   const dragImages = React.useRef<{ [key: string]: HTMLImageElement }>({})
+  const [isShiftPressed, setIsShiftPressed] = React.useState(false)
 
   React.useEffect(() => {
     items.forEach((item) => {
@@ -72,6 +75,15 @@ const Shop: React.FC<ShopProps> = ({
     onDragEnd()
   }
 
+  const handleDrag = (e: React.DragEvent) => {
+    if (e.shiftKey !== isShiftPressed) {
+      setIsShiftPressed(e.shiftKey)
+      if (e.shiftKey) {
+        onRotate()
+      }
+    }
+  }
+
   const renderItemCard = (item: Item, index: number) => {
     const canAfford = gold >= item.price
     const isDragging = index === draggingIndex
@@ -80,6 +92,7 @@ const Shop: React.FC<ShopProps> = ({
       <div
         key={index}
         draggable={canAfford}
+        onDrag={handleDrag}
         onDragStart={(e) => handleDragStart(e, item, index)}
         onDragEnd={handleDragEnd}
         className={`flex flex-col bg-white border rounded-lg ${

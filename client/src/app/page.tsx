@@ -42,6 +42,7 @@ export default function Home() {
     setGameState((prev) => ({
       ...prev,
       selectedItem: item,
+      previewRotation: 0,
     }))
   }
 
@@ -65,35 +66,21 @@ export default function Home() {
   const handleRotate = () => {
     if (!gameState.selectedItem) return
 
+    const newRotation = (((gameState.previewRotation || 0) + 90) % 360) as
+      | 0
+      | 90
+      | 180
+      | 270
+
     setGameState((prev) => ({
       ...prev,
-      previewRotation: (((prev.previewRotation || 0) + 90) % 360) as
-        | 0
-        | 90
-        | 180
-        | 270,
+      previewRotation: newRotation,
     }))
   }
 
   const handleDrop = (position: GridPosition) => {
     const { selectedItem, inventory, previewRotation } = gameState
     if (!selectedItem) {
-      // Reset preview state even if no item is selected
-      setGameState((prev) => ({
-        ...prev,
-        selectedItem: undefined,
-        previewPosition: undefined,
-        previewRotation: 0,
-      }))
-      return
-    }
-
-    // Check if this is a bag and if there are non-bag items already placed
-    if (
-      selectedItem.item_type === ItemType.BAG &&
-      inventory.some((item) => item.item_type !== ItemType.BAG)
-    ) {
-      // Reset preview state when placement is invalid
       setGameState((prev) => ({
         ...prev,
         selectedItem: undefined,
@@ -111,7 +98,6 @@ export default function Home() {
     )
 
     if (!validation.isValid) {
-      // Reset preview state when placement is invalid
       setGameState((prev) => ({
         ...prev,
         selectedItem: undefined,
@@ -204,6 +190,7 @@ export default function Home() {
               onDragStart={handleDragStart}
               onPurchase={() => {}}
               onDragEnd={handleDragEnd}
+              onRotate={handleRotate}
             />
           </div>
         </div>

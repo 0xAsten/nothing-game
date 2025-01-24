@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import Image from 'next/image'
 import { GRID_WIDTH, GRID_HEIGHT } from '@/constants/gameData'
 import { PlacedItem, GridPosition, Item } from '@/types/game'
@@ -31,44 +31,35 @@ const Grid: React.FC<GridProps> = ({
     Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
   )
 
-  const handleDragOver = (e: React.DragEvent, position: GridPosition) => {
-    e.preventDefault()
-    onDragOver(position)
-  }
+  const handleDragOver = useCallback(
+    (e: React.DragEvent, position: GridPosition) => {
+      e.preventDefault()
+      if (!position) return
+      onDragOver(position)
+    },
+    [onDragOver],
+  )
 
   const handleDrop = (e: React.DragEvent, position: GridPosition) => {
     e.preventDefault()
     onDrop(position)
   }
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'r' || e.key === 'R') {
-      onRotate()
-    }
-  }
-
-  React.useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onRotate])
-
   const renderItem = (item: PlacedItem) => {
-    const { width, height } = getRotatedDimensions(item, item.rotation)
     const cellSize = 64 // Base cell size in pixels
 
     return (
       <div
         key={`item-${item.item_id}-${item.position.x}-${item.position.y}`}
-        className={`absolute transition-all duration-200 ${
+        className={`absolute transition-all duration-200 pointer-events-none ${
           item.isValid === false ? 'opacity-50' : ''
         }`}
         style={{
           left: `${item.position.x * cellSize}px`,
           bottom: `${item.position.y * cellSize}px`,
-          width: `${width * cellSize}px`,
-          height: `${height * cellSize}px`,
+          width: `${item.width * cellSize}px`,
+          height: `${item.height * cellSize}px`,
           transform: `rotate(${item.rotation}deg)`,
-          transformOrigin: 'bottom left',
         }}
       >
         {item.image_url && (
@@ -83,27 +74,57 @@ const Grid: React.FC<GridProps> = ({
     )
   }
 
-  const renderPreview = () => {
+  const renderPreview = useCallback(() => {
     if (!selectedItem || !previewPosition) return null
 
-    console.log('renderPreview', previewPosition)
+    const { width, height } = getRotatedDimensions(
+      selectedItem,
+      previewRotation || 0,
+    )
+
+    let adjustedPosition = { ...previewPosition }
+
+    switch (previewRotation) {
+      case 90:
+        adjustedPosition = previewPosition
+        break
+      case 180:
+        adjustedPosition = {
+          x: previewPosition.x,
+          y: previewPosition.y - height + 1,
+        }
+        break
+      case 270:
+        adjustedPosition = {
+          x: previewPosition.x - width + 1,
+          y: previewPosition.y,
+        }
+        break
+      default:
+        adjustedPosition = previewPosition
+    }
 
     const previewItem: PlacedItem = {
       ...selectedItem,
-      position: previewPosition,
+      width: width,
+      height: height,
+      position: {
+        x: adjustedPosition.x,
+        y: adjustedPosition.y,
+      },
       rotation: previewRotation || 0,
     }
 
     const validation = validatePlacement(
       previewItem,
-      previewPosition,
+      previewItem.position,
       previewRotation || 0,
       items,
     )
     previewItem.isValid = validation.isValid
 
     return renderItem(previewItem)
-  }
+  }, [selectedItem, previewPosition, previewRotation, items])
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -135,10 +156,7 @@ const Grid: React.FC<GridProps> = ({
                   handleDragOver(e, { x, y: GRID_HEIGHT - y - 1 })
                 }
                 onDrop={(e) => handleDrop(e, { x, y: GRID_HEIGHT - y - 1 })}
-              >
-                <span>{x}</span>
-                <span>{y}</span>
-              </div>
+              ></div>
             )),
           )}
         </div>
