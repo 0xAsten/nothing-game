@@ -141,7 +141,7 @@ const Grid: React.FC<GridProps> = ({
         }}
       >
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 grid-cells"
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${GRID_WIDTH}, minmax(0, 1fr))`,

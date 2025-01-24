@@ -8,7 +8,7 @@ import {
   SAMPLE_ITEMS,
   REROLL_COST,
 } from '@/constants/gameData'
-import { GameState, Item, GridPosition, ItemType } from '@/types/game'
+import { GameState, Item, GridPosition } from '@/types/game'
 import { validatePlacement, calculateSpecialEffects } from '@/utils/gridUtils'
 
 export default function Home() {
@@ -17,6 +17,7 @@ export default function Home() {
     inventory: [],
     shopItems: [],
     selectedItem: undefined,
+    selectedItemIndex: undefined,
     previewPosition: undefined,
     previewRotation: 0,
   })
@@ -42,6 +43,7 @@ export default function Home() {
     setGameState((prev) => ({
       ...prev,
       selectedItem: item,
+      selectedItemIndex: index,
       previewRotation: 0,
     }))
   }
@@ -50,6 +52,7 @@ export default function Home() {
     setGameState((prev) => ({
       ...prev,
       selectedItem: undefined,
+      selectedItemIndex: undefined,
       previewPosition: undefined,
       previewRotation: 0,
     }))
@@ -84,6 +87,7 @@ export default function Home() {
       setGameState((prev) => ({
         ...prev,
         selectedItem: undefined,
+        selectedItemIndex: undefined,
         previewPosition: undefined,
         previewRotation: 0,
       }))
@@ -101,6 +105,7 @@ export default function Home() {
       setGameState((prev) => ({
         ...prev,
         selectedItem: undefined,
+        selectedItemIndex: undefined,
         previewPosition: undefined,
         previewRotation: 0,
       }))
@@ -119,15 +124,28 @@ export default function Home() {
 
       return {
         ...prev,
+        shopItems: prev.shopItems.filter(
+          (_, index) => index !== prev.selectedItemIndex,
+        ),
         inventory: newInventory,
         playerStats: {
           ...prev.playerStats,
           gold: prev.playerStats.gold - selectedItem.price,
-          attack: INITIAL_PLAYER_STATS.attack + specialEffects.attack,
-          defense: INITIAL_PLAYER_STATS.defense + specialEffects.defense,
-          health: INITIAL_PLAYER_STATS.health + specialEffects.health,
+          attack:
+            INITIAL_PLAYER_STATS.attack +
+            newItem.attack +
+            specialEffects.attack,
+          defense:
+            INITIAL_PLAYER_STATS.defense +
+            newItem.defense +
+            specialEffects.defense,
+          health:
+            INITIAL_PLAYER_STATS.health +
+            newItem.health +
+            specialEffects.health,
         },
         selectedItem: undefined,
+        selectedItemIndex: undefined,
         previewPosition: undefined,
         previewRotation: 0,
       }

@@ -10,6 +10,29 @@ import {
 } from '@/types/game'
 import { GRID_WIDTH, GRID_HEIGHT } from '@/constants/gameData'
 
+// Check if a bag is empty (has no items placed within it)
+export const isBagEmpty = (
+  bag: PlacedItem,
+  inventory: PlacedItem[],
+): boolean => {
+  const bagCells = getOccupiedCells(bag, bag.position, bag.rotation)
+
+  // Check if any non-bag items overlap with the bag's cells
+  const hasItems = inventory.some((item) => {
+    // Skip checking the bag itself and other bags
+    if (item.item_type === ItemType.BAG) return false
+
+    const itemCells = getOccupiedCells(item, item.position, item.rotation)
+    return itemCells.some((itemCell) =>
+      bagCells.some(
+        (bagCell) => bagCell.x === itemCell.x && bagCell.y === itemCell.y,
+      ),
+    )
+  })
+
+  return !hasItems
+}
+
 // Get dimensions of an item based on its rotation
 export const getRotatedDimensions = (
   item: Item,

@@ -61,6 +61,7 @@ export interface GameState {
   inventory: PlacedItem[]
   shopItems: Item[]
   selectedItem?: Item
+  selectedItemIndex?: number
   previewPosition?: GridPosition
   previewRotation?: 0 | 90 | 180 | 270
 }
