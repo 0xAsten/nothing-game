@@ -33,6 +33,18 @@ export const isBagEmpty = (
   return !hasItems
 }
 
+export const getEmptySlotId = (
+  inventory: PlacedItem[],
+  inventoryCount: number,
+): number => {
+  for (let i = inventoryCount; i > 0; i--) {
+    if (!inventory.some((item) => item.id === i)) {
+      return i
+    }
+  }
+  return inventoryCount + 1
+}
+
 // Get dimensions of an item based on its rotation
 export const getRotatedDimensions = (
   item: Item,

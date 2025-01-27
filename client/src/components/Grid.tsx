@@ -1,32 +1,41 @@
 import React, { useCallback } from 'react'
 import Image from 'next/image'
 import { GRID_WIDTH, GRID_HEIGHT } from '@/constants/gameData'
-import { PlacedItem, GridPosition, Item } from '@/types/game'
+import { PlacedItem, GridPosition, Item, ItemType } from '@/types/game'
 import {
   getOccupiedCells,
   validatePlacement,
   getRotatedDimensions,
+  isBagEmpty,
+  getEmptySlotId,
 } from '@/utils/gridUtils'
 
 interface GridProps {
   items: PlacedItem[]
+  inventoryCount: number
   selectedItem?: Item
   previewPosition?: GridPosition
   previewRotation?: 0 | 90 | 180 | 270
   onDrop: (position: GridPosition) => void
   onDragOver: (position: GridPosition) => void
   onRotate: () => void
+  onDiscardItem?: (id: number) => void
 }
 
 const Grid: React.FC<GridProps> = ({
   items,
+  inventoryCount,
   selectedItem,
   previewPosition,
   previewRotation,
   onDrop,
   onDragOver,
   onRotate,
+  onDiscardItem,
 }) => {
+  const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
+  const gridRef = React.useRef<HTMLDivElement>(null)
+
   const cells = Array.from({ length: GRID_HEIGHT }, (_, y) =>
     Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
   )
@@ -45,6 +54,42 @@ const Grid: React.FC<GridProps> = ({
     onDrop(position)
   }
 
+  const handleDragStart = (e: React.DragEvent, item: PlacedItem) => {
+    if (!onDiscardItem) return
+    if (item.item_type === ItemType.BAG && !isBagEmpty(item, items)) {
+      e.preventDefault()
+      return
+    }
+
+    setDraggingIndex(item.id)
+
+    e.dataTransfer.setData('text/plain', JSON.stringify(item))
+    e.dataTransfer.effectAllowed = 'move'
+
+    if (item.image_url) {
+      const img = document.createElement('img')
+      img.src = item.image_url
+      e.dataTransfer.setDragImage(img, img.width / 2, img.height / 2)
+    }
+  }
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    if (!draggingIndex || !onDiscardItem || !gridRef.current) return
+
+    const gridRect = gridRef.current.getBoundingClientRect()
+    const isOutsideGrid =
+      e.clientX < gridRect.left ||
+      e.clientX > gridRect.right ||
+      e.clientY < gridRect.top ||
+      e.clientY > gridRect.bottom
+
+    if (isOutsideGrid) {
+      onDiscardItem(draggingIndex)
+    }
+
+    setDraggingIndex(null)
+  }
+
   const renderItem = (item: PlacedItem) => {
     const cellSize = 64 // Base cell size in pixels
     const { width, height } = getRotatedDimensions(item, item.rotation)
@@ -52,18 +97,30 @@ const Grid: React.FC<GridProps> = ({
     const originalWidth = item.width * cellSize
     const originalHeight = item.height * cellSize
 
+    const isDragging = item.id === draggingIndex
+
     return (
       <div
         key={`item-${item.item_id}-${item.position.x}-${item.position.y}`}
-        className={`absolute transition-all duration-200 pointer-events-none ${
-          item.isValid === false ? 'opacity-50' : ''
+        className={`absolute transition-all duration-200 ${
+          selectedItem ? 'pointer-events-none' : ''
+        } ${item.isValid === false ? 'opacity-50' : ''} ${
+          isDragging ? 'opacity-0' : ''
         }`}
         style={{
           left: `${item.position.x * cellSize}px`,
           bottom: `${item.position.y * cellSize}px`,
           width: `${width * cellSize}px`,
           height: `${height * cellSize}px`,
+          cursor:
+            onDiscardItem &&
+            (item.item_type !== ItemType.BAG || isBagEmpty(item, items))
+              ? 'grab'
+              : 'default',
         }}
+        draggable={!!onDiscardItem}
+        onDragStart={(e) => handleDragStart(e, item)}
+        onDragEnd={handleDragEnd}
       >
         {item.image_url && (
           <div className="w-full h-full flex items-center justify-center">
@@ -76,6 +133,7 @@ const Grid: React.FC<GridProps> = ({
                 transform: `rotate(${item.rotation}deg)`,
                 transformOrigin: 'center',
                 objectFit: 'contain',
+                pointerEvents: 'none',
               }}
             />
           </div>
@@ -116,6 +174,7 @@ const Grid: React.FC<GridProps> = ({
 
     const previewItem: PlacedItem = {
       ...selectedItem,
+      id: getEmptySlotId(items, inventoryCount),
       position: adjustedPosition,
       rotation: previewRotation || 0,
     }
@@ -134,6 +193,7 @@ const Grid: React.FC<GridProps> = ({
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm">
       <div
+        ref={gridRef}
         className="relative"
         style={{
           width: `${GRID_WIDTH * 64}px`,

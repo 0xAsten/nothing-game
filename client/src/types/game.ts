@@ -51,6 +51,7 @@ export interface GridPosition {
 }
 
 export interface PlacedItem extends Item {
+  id: number
   position: GridPosition
   rotation: 0 | 90 | 180 | 270
   isValid?: boolean
@@ -59,6 +60,7 @@ export interface PlacedItem extends Item {
 export interface GameState {
   playerStats: PlayerStats
   inventory: PlacedItem[]
+  inventoryCount: number
   shopItems: Item[]
   selectedItem?: Item
   selectedItemIndex?: number

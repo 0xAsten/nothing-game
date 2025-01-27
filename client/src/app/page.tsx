@@ -8,13 +8,18 @@ import {
   SAMPLE_ITEMS,
   REROLL_COST,
 } from '@/constants/gameData'
-import { GameState, Item, GridPosition } from '@/types/game'
-import { validatePlacement, calculateSpecialEffects } from '@/utils/gridUtils'
+import { GameState, Item, GridPosition, PlacedItem } from '@/types/game'
+import {
+  validatePlacement,
+  calculateSpecialEffects,
+  getEmptySlotId,
+} from '@/utils/gridUtils'
 
 export default function Home() {
   const [gameState, setGameState] = React.useState<GameState>({
     playerStats: INITIAL_PLAYER_STATS,
     inventory: [],
+    inventoryCount: 0,
     shopItems: [],
     selectedItem: undefined,
     selectedItemIndex: undefined,
@@ -82,7 +87,8 @@ export default function Home() {
   }
 
   const handleDrop = (position: GridPosition) => {
-    const { selectedItem, inventory, previewRotation } = gameState
+    const { selectedItem, inventory, inventoryCount, previewRotation } =
+      gameState
     if (!selectedItem) {
       setGameState((prev) => ({
         ...prev,
@@ -112,8 +118,10 @@ export default function Home() {
       return
     }
 
+    const newId = getEmptySlotId(inventory, inventoryCount)
     const newItem = {
       ...selectedItem,
+      id: newId,
       position,
       rotation: (previewRotation || 0) as 0 | 90 | 180 | 270,
     }
@@ -128,6 +136,7 @@ export default function Home() {
           (_, index) => index !== prev.selectedItemIndex,
         ),
         inventory: newInventory,
+        inventoryCount: newId > inventoryCount ? newId : inventoryCount,
         playerStats: {
           ...prev.playerStats,
           gold: prev.playerStats.gold - selectedItem.price,
@@ -148,6 +157,31 @@ export default function Home() {
         selectedItemIndex: undefined,
         previewPosition: undefined,
         previewRotation: 0,
+      }
+    })
+  }
+
+  const handleDiscardItem = (id: number) => {
+    setGameState((prev) => {
+      const item = prev.inventory.find((i) => i.id === id)
+      if (!item) return prev
+      const newInventory = prev.inventory.filter((i) => i.id !== id)
+      const specialEffects = calculateSpecialEffects(newInventory)
+
+      return {
+        ...prev,
+        inventory: newInventory,
+        playerStats: {
+          ...prev.playerStats,
+          attack:
+            INITIAL_PLAYER_STATS.attack - item.attack + specialEffects.attack,
+          defense:
+            INITIAL_PLAYER_STATS.defense -
+            item.defense +
+            specialEffects.defense,
+          health:
+            INITIAL_PLAYER_STATS.health - item.health + specialEffects.health,
+        },
       }
     })
   }
@@ -192,12 +226,14 @@ export default function Home() {
             </div>
             <Grid
               items={gameState.inventory}
+              inventoryCount={gameState.inventoryCount}
               selectedItem={gameState.selectedItem}
               previewPosition={gameState.previewPosition}
               previewRotation={gameState.previewRotation}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onRotate={handleRotate}
+              onDiscardItem={handleDiscardItem}
             />
           </div>
           <div>
