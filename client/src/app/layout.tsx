@@ -18,7 +18,7 @@ export default function RootLayout({
       <body className="bg-gray-50">
         <StarknetProvider>
           <Header />
-          <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+          <main className="max-w-7xl mx-auto px-4 py-1">{children}</main>
         </StarknetProvider>
       </body>
     </html>

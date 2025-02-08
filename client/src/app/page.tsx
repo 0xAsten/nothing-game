@@ -8,12 +8,19 @@ import {
   SAMPLE_ITEMS,
   REROLL_COST,
 } from '@/constants/gameData'
-import { GameState, Item, GridPosition, PlacedItem } from '@/types/game'
+import {
+  GameState,
+  Item,
+  GridPosition,
+  PlacedItem,
+  PlayerStats,
+} from '@/types/game'
 import {
   validatePlacement,
   calculateSpecialEffects,
   getEmptySlotId,
 } from '@/utils/gridUtils'
+import { PlayerStats as PlayerStatsComponent } from '@/components/PlayerStats'
 
 export default function Home() {
   const [gameState, setGameState] = React.useState<GameState>({
@@ -26,6 +33,10 @@ export default function Home() {
     previewPosition: undefined,
     previewRotation: 0,
   })
+
+  const [previousStats, setPreviousStats] = React.useState<
+    PlayerStats | undefined
+  >()
 
   const handleReroll = () => {
     if (gameState.playerStats.gold < REROLL_COST) return
@@ -127,6 +138,8 @@ export default function Home() {
     }
 
     setGameState((prev) => {
+      setPreviousStats(prev.playerStats)
+
       const newInventory = [...prev.inventory, newItem]
       const specialEffects = calculateSpecialEffects(newInventory)
 
@@ -163,6 +176,8 @@ export default function Home() {
 
   const handleDiscardItem = (id: number) => {
     setGameState((prev) => {
+      setPreviousStats(prev.playerStats)
+
       const item = prev.inventory.find((i) => i.id === id)
       if (!item) return prev
       const newInventory = prev.inventory.filter((i) => i.id !== id)
@@ -187,43 +202,14 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen">
+      <div className="game-container">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg p-4 shadow-sm mb-8">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Player Stats
-                </h2>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-amber-500 font-medium">
-                      {gameState.playerStats.gold}
-                    </span>
-                    <span className="text-gray-600">Gold</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-500 font-medium">
-                      {gameState.playerStats.attack}
-                    </span>
-                    <span className="text-gray-600">ATK</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-500 font-medium">
-                      {gameState.playerStats.defense}
-                    </span>
-                    <span className="text-gray-600">DEF</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-medium">
-                      {gameState.playerStats.health}
-                    </span>
-                    <span className="text-gray-600">HP</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PlayerStatsComponent
+              stats={gameState.playerStats}
+              previousStats={previousStats}
+            />
             <Grid
               items={gameState.inventory}
               inventoryCount={gameState.inventoryCount}

@@ -3,83 +3,367 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #2563eb;
-  --secondary-color: #1e40af;
+  --primary-color: #4f46e5;
+  --secondary-color: #4338ca;
   --accent-color: #fbbf24;
-  --background-color: #f3f4f6;
+  --background-color: #1a1a2e;
   --grid-cell-size: 50px;
 }
 
 body {
   background-color: var(--background-color);
-  color: #1f2937;
+  color: #e5e7eb;
+  background-image: url('/images/game-bg.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+html {
+  overflow: hidden;
+}
+
+.game-container {
+  @apply max-w-7xl mx-auto p-4 md:p-8;
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .game-grid {
-  background: white;
-  border: 2px solid #e5e7eb;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(17, 24, 39, 0.95);
+  padding: 1px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: inset 0 0 20px rgba(79, 70, 229, 0.1);
+  border: 2px solid rgba(79, 70, 229, 0.3);
 }
 
 .grid-cell {
-  width: var(--grid-cell-size);
-  height: var(--grid-cell-size);
-  border: 1px solid #e5e7eb;
-  background: white;
-  transition: background-color 0.2s;
+  @apply aspect-square relative transition-all duration-200;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(79, 70, 229, 0.1);
 }
 
 .grid-cell:hover {
-  background: #f9fafb;
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.grid-cell.valid-drop {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.grid-cell.invalid-drop {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.shop-container {
+  @apply p-4 rounded-lg;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 24, 39, 0.95),
+    rgba(30, 41, 59, 0.95)
+  );
+  border: 2px solid rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.shop-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.shop-title {
+  @apply text-xl font-bold;
+  background: linear-gradient(to right, #4f46e5, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shop-items-grid {
+  @apply grid grid-cols-2 gap-4;
 }
 
 .shop-item {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 1rem;
-  transition: all 0.2s;
+  @apply p-4 rounded-lg transition-all duration-200;
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: move;
 }
 
-.shop-item:hover {
+.shop-item:hover:not(.shop-item-disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border-color: rgba(79, 70, 229, 0.6);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
-.stat-display {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+.shop-item-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Stack group indicators */
+.shop-item-stack-1 {
+  border-left: 3px solid rgba(59, 130, 246, 0.8);
+}
+.shop-item-stack-2 {
+  border-left: 3px solid rgba(34, 197, 94, 0.8);
+}
+.shop-item-stack-3 {
+  border-left: 3px solid rgba(234, 179, 8, 0.8);
+}
+.shop-item-stack-4 {
+  border-left: 3px solid rgba(239, 68, 68, 0.8);
+}
+.shop-item-stack-5 {
+  border-left: 3px solid rgba(168, 85, 247, 0.8);
+}
+
+.player-stats {
+  @apply p-4 rounded-lg flex items-center justify-between;
+  background: linear-gradient(
+    to right,
+    rgba(17, 24, 39, 0.95),
+    rgba(30, 41, 59, 0.95)
+  );
+  border: 2px solid rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-item {
+  @apply flex items-center gap-2 px-4 py-2 rounded-md;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-gold {
+  color: #fbbf24;
+}
+.stat-atk {
+  color: #ef4444;
+}
+.stat-def {
+  color: #3b82f6;
+}
+.stat-hp {
+  color: #22c55e;
+}
+
+.stat-value {
+  @apply font-bold text-lg;
+  text-shadow: 0 0 8px currentColor;
 }
 
 .inventory-item {
   position: absolute;
-  background: rgba(37, 99, 235, 0.1);
-  border: 2px solid var(--primary-color);
+  background: rgba(79, 70, 229, 0.15);
+  border: 2px solid #4f46e5;
   border-radius: 4px;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
   cursor: move;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+}
+
+.inventory-item:hover {
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
 }
 
 .reroll-button {
-  background: var(--primary-color);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  background: linear-gradient(to bottom right, #4f46e5, #3730a3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .reroll-button:hover:not(:disabled) {
-  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
 }
 
 .reroll-button:disabled {
-  background: #9ca3af;
+  background: #6b7280;
   cursor: not-allowed;
+}
+
+/* Add glowing effects for special items */
+.rarity-legendary {
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5;
+  }
+  to {
+    box-shadow: 0 0 10px #4f46e5, 0 0 20px #4f46e5, 0 0 30px #4f46e5;
+  }
+}
+
+.grid-container {
+  @apply p-6 rounded-lg;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 24, 39, 0.95),
+    rgba(30, 41, 59, 0.95)
+  );
+  border: 2px solid rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Add these new styles */
+.stat-badge {
+  @apply px-2 py-1 rounded-md text-sm font-medium;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.stat-badge-gold {
+  @apply bg-amber-500/20 text-amber-400 border border-amber-500/30;
+}
+
+.stat-badge-atk {
+  @apply bg-red-500/20 text-red-400 border border-red-500/30;
+}
+
+.stat-badge-def {
+  @apply bg-blue-500/20 text-blue-400 border border-blue-500/30;
+}
+
+.stat-badge-hp {
+  @apply bg-green-500/20 text-green-400 border border-green-500/30;
+}
+
+/* Add item placement animations */
+.inventory-item-placed {
+  animation: placementPop 0.3s ease-out;
+}
+
+@keyframes placementPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Add these new styles */
+.player-stats-container {
+  @apply bg-gray-900/95 rounded-lg p-4 mb-6 border border-indigo-500/30;
+  backdrop-filter: blur(8px);
+}
+
+.player-stats-grid {
+  @apply grid grid-cols-4 gap-4;
+}
+
+.stat-card {
+  @apply flex flex-col items-center justify-center p-3 rounded-lg bg-gray-800/50 border border-gray-700/50;
+  transition: all 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+  @apply border-indigo-500/30 bg-gray-800/80;
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  @apply text-sm text-gray-400 mb-1;
+}
+
+.stat-value {
+  @apply text-2xl font-bold;
+}
+
+.stat-value.gold {
+  @apply text-amber-400;
+}
+.stat-value.atk {
+  @apply text-red-400;
+}
+.stat-value.def {
+  @apply text-blue-400;
+}
+.stat-value.hp {
+  @apply text-green-400;
+}
+
+/* Fix sword image sizing */
+.shop-item img,
+.inventory-item img {
+  @apply object-contain;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* Add these new styles for stat value animations */
+@keyframes statIncrease {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes statDecrease {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(0.8);
+    filter: brightness(0.8);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.stat-value {
+  transition: all 0.3s ease;
+}
+
+.stat-value.increasing {
+  animation: statIncrease 0.5s ease;
+}
+
+.stat-value.decreasing {
+  animation: statDecrease 0.5s ease;
+}
+
+/* Enhance the glow effect for each stat type */
+.stat-value.gold.increasing {
+  text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+}
+
+.stat-value.atk.increasing {
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+}
+
+.stat-value.def.increasing {
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+}
+
+.stat-value.hp.increasing {
+  text-shadow: 0 0 15px rgba(34, 197, 94, 0.8);
 }

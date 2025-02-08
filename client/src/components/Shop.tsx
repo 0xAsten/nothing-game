@@ -95,97 +95,81 @@ const Shop: React.FC<ShopProps> = ({
         onDrag={handleDrag}
         onDragStart={(e) => handleDragStart(e, item, index)}
         onDragEnd={handleDragEnd}
-        className={`flex flex-col bg-white border rounded-lg ${
-          isDragging ? 'opacity-0' : ''
+        className={`shop-item ${isDragging ? 'opacity-0' : ''} ${
+          !canAfford ? 'shop-item-disabled' : ''
         } ${
-          canAfford
-            ? 'cursor-move hover:border-gray-300'
-            : 'opacity-50 cursor-not-allowed'
-        } ${
-          item.stack_group_id
-            ? `border-l-4 border-l-${getStackGroupColor(
-                item.stack_group_id,
-              )}-500`
-            : 'border-gray-200'
+          item.stack_group_id ? `shop-item-stack-${item.stack_group_id}` : ''
         }`}
       >
-        {/* Top section: Image, Name, Size, Price */}
-        <div className="p-4 border-b">
-          <div className="flex justify-between items-start gap-3">
-            <div className="relative">
-              <div className="w-12 h-12">
-                {item.image_url && (
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    fill
-                    className="object-contain"
-                  />
-                )}
-              </div>
-              <div className="absolute -bottom-2 -right-2 text-amber-500 font-medium">
-                {item.price}
-              </div>
+        <div className="flex items-start gap-3">
+          <div className="relative">
+            <div className="w-12 h-12 bg-gray-800/30 rounded-lg flex items-center justify-center">
+              {item.image_url && (
+                <Image
+                  src={item.image_url}
+                  alt={item.name}
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              )}
             </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-900">{item.name}</h3>
-              <div className="text-sm text-gray-500">
-                {item.width}×{item.height}
-              </div>
+            <div className="absolute -bottom-2 -right-2 px-2 py-1 bg-amber-500/90 rounded-md text-white text-sm font-medium">
+              {item.price}
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-medium text-gray-100">{item.name}</h3>
+            <div className="text-sm text-gray-400 mt-1">
+              Size: {item.width}×{item.height}
             </div>
           </div>
         </div>
 
-        {/* Bottom section: Stats and Effects */}
-        <div className="p-4 space-y-2">
-          <div className="flex gap-2">
-            {item.attack > 0 && (
-              <span className="text-red-500">+{item.attack} ATK</span>
-            )}
-            {item.defense > 0 && (
-              <span className="text-blue-500">+{item.defense} DEF</span>
-            )}
-            {item.health > 0 && (
-              <span className="text-green-500">+{item.health} HP</span>
-            )}
-          </div>
-          {item.item_type === ItemType.ACCESSORY && item.special_effect && (
-            <div className="text-sm text-purple-600">
-              Enhance{' '}
-              {item.special_effect === SpecialEffect.ATTACK
-                ? 'Attack'
-                : item.special_effect === SpecialEffect.DEFENSE
-                ? 'Defense'
-                : 'Health'}
-              {item.special_effect_stacks && item.special_effect_stacks > 1 && (
-                <span className="ml-1">({item.special_effect_stacks})</span>
-              )}
-            </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {item.attack > 0 && (
+            <span className="stat-badge stat-badge-atk">
+              +{item.attack} ATK
+            </span>
+          )}
+          {item.defense > 0 && (
+            <span className="stat-badge stat-badge-def">
+              +{item.defense} DEF
+            </span>
+          )}
+          {item.health > 0 && (
+            <span className="stat-badge stat-badge-hp">+{item.health} HP</span>
           )}
         </div>
+
+        {item.item_type === ItemType.ACCESSORY && item.special_effect && (
+          <div className="mt-2 text-sm font-medium text-purple-300">
+            Enhance {item.special_effect}
+            {item.special_effect_stacks && item.special_effect_stacks > 1 && (
+              <span className="ml-1">({item.special_effect_stacks})</span>
+            )}
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-gray-900">Shop</h2>
-          <div className="flex items-center gap-1">
-            <span className="text-amber-500 font-medium">{gold}</span>
-            <span className="text-gray-600">Gold</span>
-          </div>
+    <div className="shop-container">
+      <div className="shop-header">
+        <div className="flex items-center gap-4">
+          <h2 className="shop-title">Shop</h2>
+          <div className="stat-badge stat-badge-gold">{gold} Gold</div>
         </div>
         <button
           onClick={onReroll}
           disabled={gold < REROLL_COST}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="reroll-button"
         >
           Reroll ({REROLL_COST} gold)
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="shop-items-grid">
         {items.map((item, index) => renderItemCard(item, index))}
       </div>
     </div>

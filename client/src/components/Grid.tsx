@@ -191,7 +191,15 @@ const Grid: React.FC<GridProps> = ({
   }, [selectedItem, previewPosition, previewRotation, items])
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm">
+    <div className="grid-container">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          Inventory Grid
+        </h2>
+        <div className="text-sm text-gray-400">
+          Drag items to place • Shift + Drag to rotate • Drag outside to discard
+        </div>
+      </div>
       <div
         ref={gridRef}
         className="relative"
@@ -201,22 +209,18 @@ const Grid: React.FC<GridProps> = ({
         }}
       >
         <div
-          className="absolute inset-0 grid-cells"
+          className="absolute inset-0 game-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${GRID_WIDTH}, minmax(0, 1fr))`,
             gap: '1px',
-            backgroundColor: '#e5e7eb',
-            padding: '1px',
-            borderRadius: '4px',
           }}
         >
-          {/* the value of y need to be reverse */}
           {cells.map((row, y) =>
             row.map((cell, x) => (
               <div
                 key={`${x}-${y}`}
-                className="aspect-square bg-white hover:bg-gray-50"
+                className="grid-cell"
                 onDragOver={(e) =>
                   handleDragOver(e, { x, y: GRID_HEIGHT - y - 1 })
                 }
