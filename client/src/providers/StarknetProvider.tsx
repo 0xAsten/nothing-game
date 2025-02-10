@@ -9,6 +9,7 @@ import {
 import ControllerConnector from '@cartridge/connector/controller'
 import { SessionPolicies } from '@cartridge/controller'
 import { constants } from 'starknet'
+import { CHARACTER_SYSTEM, SHOP_SYSTEM } from '../config/contracts'
 
 // Define your contract addresses
 const ETH_TOKEN_ADDRESS =
@@ -17,14 +18,32 @@ const ETH_TOKEN_ADDRESS =
 // Define session policies
 const policies: SessionPolicies = {
   contracts: {
-    [ETH_TOKEN_ADDRESS]: {
+    [CHARACTER_SYSTEM!.address]: {
       methods: [
         {
-          name: 'approve',
-          entrypoint: 'approve',
-          description: 'Approve spending of tokens',
+          name: 'spawn',
+          entrypoint: 'spawn',
         },
-        { name: 'transfer', entrypoint: 'transfer' },
+        {
+          name: 'buy_item',
+          entrypoint: 'buy_item',
+        },
+        {
+          name: 'remove_item',
+          entrypoint: 'remove_item',
+        },
+        {
+          name: 'upgrade',
+          entrypoint: 'upgrade',
+        },
+      ],
+    },
+    [SHOP_SYSTEM!.address]: {
+      methods: [
+        {
+          name: 'reroll_shop',
+          entrypoint: 'reroll_shop',
+        },
       ],
     },
   },
