@@ -9,6 +9,7 @@ import {
 import { SHOP_SYSTEM } from '../config/contracts'
 import { getPlayerShop } from '@/services/game.service'
 import { ShopData } from '@/types/game'
+import { subscribeToShopUpdates } from '@/services/subscriptions'
 
 interface UseShopResult {
   isRerolling: boolean
@@ -38,36 +39,42 @@ export function useShop(): UseShopResult {
     calls: contract ? [contract.populate('reroll_shop', [])] : undefined,
   })
 
-  // Add effect to monitor transaction status
+  // Subscribe to shop updates
+  useEffect(() => {
+    if (!address) return
+
+    const unsubscribe = subscribeToShopUpdates(address, {
+      onData: (newShopData) => {
+        if (newShopData) {
+          setShopData(newShopData)
+          setIsRerolling(false)
+        }
+      },
+      onError: (err) => {
+        console.error('Shop subscription error:', err)
+        setError('Failed to get shop updates')
+      },
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [address])
+
+  // Monitor transaction status
   useEffect(() => {
     if (isPending) {
       setIsRerolling(true)
-    } else if (!isPending) {
-      setTimeout(() => {
-        setIsRerolling(false)
-      }, 1000)
-
-      if (isError) {
-        setError(sendError?.message || 'Transaction failed')
-      } else if (!isError && !isPending) {
-        // Transaction was successful, fetch updated shop data
-        setTimeout(() => {
-          getPlayerShop(address as `0x${string}`).then((newShopData) => {
-            console.log('newShopData', newShopData)
-            if (newShopData) {
-              setShopData(newShopData)
-            }
-          })
-        }, 1000)
-      }
+    } else if (!isPending && isError) {
+      setIsRerolling(false)
+      setError(sendError?.message || 'Transaction failed')
     }
-  }, [isPending, isError, sendError, address])
+  }, [isPending, isError, sendError])
 
   const clearError = useCallback(() => {
     setError(null)
   }, [])
 
-  // Add error handling for network/API errors
   const rerollShop = async () => {
     if (!address || !contract || !send) {
       setError('Contract not initialized')

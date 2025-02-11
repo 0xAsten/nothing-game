@@ -87,3 +87,19 @@ export const GET_CHAR_ITEMS_QUERY = gql`
     }
   }
 `
+
+export const SHOP_SUBSCRIPTION = gql`
+  subscription EntityUpdated($address: String!) {
+    entityUpdated {
+      models {
+        ... on nothing_game_Shop {
+          player
+          item1_id
+          item2_id
+          item3_id
+          item4_id
+        }
+      }
+    }
+  }
+`

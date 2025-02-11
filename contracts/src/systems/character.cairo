@@ -3,6 +3,7 @@ trait ICharacter<T> {
     fn spawn(ref self: T);
     fn buy_item(ref self: T, item_id: u32, x: u8, y: u8, rotation: u8);
     fn remove_item(ref self: T, slot_id: u32);
+    fn reset(ref self: T);
 }
 
 #[dojo::contract]
@@ -384,6 +385,80 @@ mod character_system {
             character_item.item_id = 0;
             world.write_model(@character_item);
             world.write_model(@character);
+        }
+
+        fn reset(ref self: ContractState) {
+            let mut world = self.world(@"nothing_game");
+            let player = get_caller_address();
+
+            // Reset Character
+            world
+                .write_model(
+                    @Character {
+                        player,
+                        gold: INIT_GOLD,
+                        initialized: true,
+                        attack: 0,
+                        defense: 0,
+                        health: INIT_HEALTH,
+                    },
+                );
+
+            // Reset Shop
+            world.write_model(@Shop { player, item1_id: 0, item2_id: 0, item3_id: 0, item4_id: 0 });
+
+            // Reset all BackpackGrid slots
+            let mut x: u8 = 0;
+            loop {
+                if x >= GRID_X {
+                    break;
+                }
+                let mut y: u8 = 0;
+                loop {
+                    if y >= GRID_Y {
+                        break;
+                    }
+                    world
+                        .write_model(
+                            @BackpackGrid {
+                                player,
+                                x,
+                                y,
+                                enabled: false, // Only enable initial 3x3 grid
+                                occupied: false,
+                            },
+                        );
+                    y += 1;
+                };
+                x += 1;
+            };
+
+            // Reset all CharacterItems
+            let item_registry: CharacterItemRegistry = world.read_model(player);
+            let mut slot_id = item_registry.next_slot_id;
+            loop {
+                if slot_id == 0 {
+                    break;
+                }
+                world
+                    .write_model(
+                        @CharacterItem {
+                            player,
+                            slot_id,
+                            item_id: 0,
+                            item_type: 0,
+                            position: Position { x: 0, y: 0 },
+                            rotation: 0,
+                            stack_group_id: 0,
+                            effect_applied: false,
+                            owned: array![(0, 0), (0, 0)],
+                        },
+                    );
+                slot_id -= 1;
+            };
+
+            // Reset CharacterItemRegistry
+            world.write_model(@CharacterItemRegistry { player, next_slot_id: 0 });
         }
     }
 }

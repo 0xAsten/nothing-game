@@ -1253,7 +1253,7 @@
   "contracts": [
     {
       "address": "0xf6ea55e020f8fc7a532ebbd3b79f6798492c56eba773d781334c325e112eeb",
-      "class_hash": "0x4eab119aa0b43838c8750b5c7a1b2d394a46c47f62f2dd79ebe8f7de565c691",
+      "class_hash": "0x1b1cd3b1ac69de89e7f8807a790461a1094ce65531189f6e2f29672bee80202",
       "abi": [
         {
           "type": "impl",
@@ -1354,6 +1354,13 @@
                   "type": "core::integer::u32"
                 }
               ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "reset",
+              "inputs": [],
               "outputs": [],
               "state_mutability": "external"
             }
@@ -1481,6 +1488,7 @@
         "spawn",
         "buy_item",
         "remove_item",
+        "reset",
         "upgrade"
       ]
     },
