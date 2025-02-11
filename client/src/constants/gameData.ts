@@ -2,14 +2,14 @@ import { Item, ItemType, SpecialEffect, StackGroup } from '@/types/game'
 
 export const GRID_WIDTH = 9
 export const GRID_HEIGHT = 7
-export const INITIAL_GOLD = 300
+export const INITIAL_GOLD = 0
 export const REROLL_COST = 10
 
 export const INITIAL_PLAYER_STATS = {
   gold: INITIAL_GOLD,
-  health: 100,
-  attack: 20,
-  defense: 30,
+  health: 0,
+  attack: 0,
+  defense: 0,
 }
 
 export const SAMPLE_ITEMS: Record<number, Item> = {

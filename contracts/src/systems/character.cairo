@@ -41,12 +41,11 @@ mod character_system {
                         health: INIT_HEALTH,
                     },
                 );
+            // let mut shop: Shop = world.read_model(player);
+        // shop.item1_id = 24;
+        // world.write_model(@shop);
 
-            let mut shop: Shop = world.read_model(player);
-            shop.item1_id = 24;
-            world.write_model(@shop);
-
-            self.buy_item(24, 3, 2, 0);
+            // self.buy_item(24, 3, 2, 0);
         }
 
         fn buy_item(ref self: ContractState, item_id: u32, x: u8, y: u8, rotation: u8) {

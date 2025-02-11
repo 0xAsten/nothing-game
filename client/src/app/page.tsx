@@ -21,10 +21,19 @@ import {
   getEmptySlotId,
 } from '@/utils/gridUtils'
 import { PlayerStats as PlayerStatsComponent } from '@/components/PlayerStats'
+import { useAccount } from '@starknet-react/core'
+import {
+  getPlayerGrid,
+  getPlayerShop,
+  getPlayerItems,
+} from '@/services/game.service'
+import { useUser } from '@/contexts/UserContext'
 
 export default function Home() {
+  const { address } = useAccount()
+  const { userStats } = useUser()
   const [gameState, setGameState] = React.useState<GameState>({
-    playerStats: INITIAL_PLAYER_STATS,
+    playerStats: userStats || INITIAL_PLAYER_STATS,
     inventory: [],
     inventoryCount: 0,
     shopItems: [],
@@ -37,6 +46,40 @@ export default function Home() {
   const [previousStats, setPreviousStats] = React.useState<
     PlayerStats | undefined
   >()
+
+  React.useEffect(() => {
+    if (!address) return
+
+    const loadGameData = async () => {
+      const [shopData, itemsData] = await Promise.all([
+        getPlayerShop(address),
+        getPlayerItems(address),
+      ])
+
+      // Update game state with grid and shop data
+      setGameState((prev) => ({
+        ...prev,
+        inventory: itemsData.map((item) => ({
+          ...SAMPLE_ITEMS[item.item_id],
+          id: item.slot_id,
+          position: { x: item.position.x, y: item.position.y },
+          rotation: (item.rotation * 90) as 0 | 90 | 180 | 270,
+        })),
+        shopItems: shopData
+          ? [
+              shopData.item1_id,
+              shopData.item2_id,
+              shopData.item3_id,
+              shopData.item4_id,
+            ]
+              .map((itemId) => SAMPLE_ITEMS[itemId])
+              .filter(Boolean)
+          : [],
+      }))
+    }
+
+    loadGameData()
+  }, [address])
 
   const handleReroll = () => {
     if (gameState.playerStats.gold < REROLL_COST) return

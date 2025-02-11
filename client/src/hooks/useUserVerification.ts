@@ -6,14 +6,16 @@ import {
   useContract,
   useSendTransaction,
 } from '@starknet-react/core'
-import { checkUserExists } from '../services/user.service'
+import { getUserStats } from '../services/user.service'
 import { CHARACTER_SYSTEM } from '../config/contracts'
+import { PlayerStats } from '../types/game'
 
 interface UseUserVerificationResult {
   isLoading: boolean
   isVerified: boolean
   error: string | null
   spawnUser: () => Promise<void>
+  userStats: PlayerStats | null
 }
 
 export function useUserVerification(): UseUserVerificationResult {
@@ -22,6 +24,7 @@ export function useUserVerification(): UseUserVerificationResult {
   const [isVerified, setIsVerified] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPolling, setIsPolling] = useState(false)
+  const [userStats, setUserStats] = useState<any | null>(null)
 
   const { contract } = useContract({
     abi: CHARACTER_SYSTEM!.abi,
@@ -34,7 +37,16 @@ export function useUserVerification(): UseUserVerificationResult {
 
   const verifyUser = useCallback(async () => {
     if (!address) return false
-    return await checkUserExists(address)
+    const stats = await getUserStats(address)
+    if (stats) {
+      setUserStats({
+        gold: stats.gold,
+        health: stats.health,
+        attack: stats.attack,
+        defense: stats.defense,
+      })
+    }
+    return stats !== null && stats.initialized
   }, [address])
 
   const startPolling = useCallback(async () => {
@@ -109,5 +121,5 @@ export function useUserVerification(): UseUserVerificationResult {
     verifyUserEffect()
   }, [address, verifyUser])
 
-  return { isLoading, isVerified, error, spawnUser }
+  return { isLoading, isVerified, error, spawnUser, userStats }
 }

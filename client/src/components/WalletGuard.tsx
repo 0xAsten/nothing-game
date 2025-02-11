@@ -1,7 +1,7 @@
 'use client'
 
 import { useAccount } from '@starknet-react/core'
-import { useUserVerification } from '@/hooks/useUserVerification'
+import { useUser } from '@/contexts/UserContext'
 import { ConnectWallet } from './ConnectWallet'
 
 interface WalletGuardProps {
@@ -10,7 +10,7 @@ interface WalletGuardProps {
 
 export function WalletGuard({ children }: WalletGuardProps) {
   const { address } = useAccount()
-  const { isLoading, isVerified, error, spawnUser } = useUserVerification()
+  const { isLoading, isVerified, error, spawnUser } = useUser()
 
   if (!address) {
     return (

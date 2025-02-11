@@ -13,6 +13,6 @@ slot deployments create nothing-game torii \
  --world 0x0456e4818b95a2fffc646f691e8df897952d2bb7e520232bdeeb26d91259ece9 \
  --version 1.0.9
 
-https://api.cartridge.gg/x/nothing-game/torii
+https://api.cartridge.gg/x/nothing-game/torii/graphql
 
 ./scripts/add_item.sh

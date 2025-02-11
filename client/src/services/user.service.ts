@@ -18,16 +18,17 @@ interface CharacterModelsResponse {
   }
 }
 
-export async function checkUserExists(address: string): Promise<boolean> {
+export async function getUserStats(
+  address: string,
+): Promise<CharacterModel | null> {
   try {
     const data = await graphqlClient.request<CharacterModelsResponse>(
       CHECK_USER_QUERY,
       { address },
     )
-    console.log(data)
-    return data.nothingGameCharacterModels.edges.length > 0
+    return data.nothingGameCharacterModels.edges[0]?.node || null
   } catch (error) {
     console.error('Error checking user:', error)
-    return false
+    return null
   }
 }
