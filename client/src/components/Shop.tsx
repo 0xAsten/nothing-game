@@ -3,6 +3,7 @@ import { Item } from '@/types/game'
 import { REROLL_COST } from '@/constants/gameData'
 import Image from 'next/image'
 import { ItemType, SpecialEffect } from '@/types/game'
+import { Alert } from './ui/Alert'
 
 interface ShopProps {
   items: Item[]
@@ -12,6 +13,9 @@ interface ShopProps {
   onPurchase: (item: Item) => void
   onDragEnd: () => void
   onRotate: () => void
+  isRerolling?: boolean
+  error?: string | null
+  onErrorDismiss?: () => void
 }
 
 const Shop: React.FC<ShopProps> = ({
@@ -22,6 +26,9 @@ const Shop: React.FC<ShopProps> = ({
   onPurchase,
   onDragEnd,
   onRotate,
+  isRerolling = false,
+  error,
+  onErrorDismiss,
 }) => {
   const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
   const dragImages = React.useRef<{ [key: string]: HTMLImageElement }>({})
@@ -155,24 +162,37 @@ const Shop: React.FC<ShopProps> = ({
   }
 
   return (
-    <div className="shop-container">
-      <div className="shop-header">
-        <div className="flex items-center gap-4">
-          <h2 className="shop-title">Shop</h2>
-          <div className="stat-badge stat-badge-gold">{gold} Gold</div>
+    <>
+      <div className={`shop-container ${isRerolling ? 'rerolling' : ''}`}>
+        <div className="shop-header">
+          <div className="flex items-center gap-4">
+            <h2 className="shop-title">Shop</h2>
+            <div className="stat-badge stat-badge-gold">{gold} Gold</div>
+          </div>
+          <button
+            onClick={onReroll}
+            disabled={gold < REROLL_COST || isRerolling}
+            className="reroll-button"
+          >
+            {isRerolling ? (
+              <span className="flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-white rounded-full border-t-transparent"></div>
+                Rerolling...
+              </span>
+            ) : (
+              `Reroll (${REROLL_COST} gold)`
+            )}
+          </button>
         </div>
-        <button
-          onClick={onReroll}
-          disabled={gold < REROLL_COST}
-          className="reroll-button"
+        <div
+          className={`shop-items-grid ${isRerolling ? 'animate-pulse' : ''}`}
         >
-          Reroll ({REROLL_COST} gold)
-        </button>
+          {items.map((item, index) => renderItemCard(item, index))}
+        </div>
       </div>
-      <div className="shop-items-grid">
-        {items.map((item, index) => renderItemCard(item, index))}
-      </div>
-    </div>
+
+      {error && <Alert type="error" message={error} onClose={onErrorDismiss} />}
+    </>
   )
 }
 

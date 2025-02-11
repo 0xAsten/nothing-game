@@ -78,3 +78,10 @@ export interface ValidationResult {
   isValid: boolean
   reason?: string
 }
+
+export interface ShopData {
+  item1_id: number
+  item2_id: number
+  item3_id: number
+  item4_id: number
+}

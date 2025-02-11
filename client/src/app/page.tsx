@@ -28,10 +28,20 @@ import {
   getPlayerItems,
 } from '@/services/game.service'
 import { useUser } from '@/contexts/UserContext'
+import { useShop } from '@/hooks/useShop'
 
 export default function Home() {
   const { address } = useAccount()
   const { userStats } = useUser()
+
+  const {
+    isRerolling,
+    rerollShop,
+    shopData,
+    error: shopError,
+    clearError,
+  } = useShop()
+
   const [gameState, setGameState] = React.useState<GameState>({
     playerStats: userStats || INITIAL_PLAYER_STATS,
     inventory: [],
@@ -81,22 +91,36 @@ export default function Home() {
     loadGameData()
   }, [address])
 
-  const handleReroll = () => {
-    if (gameState.playerStats.gold < REROLL_COST) return
+  const handleReroll = async () => {
+    if (!userStats || userStats.gold < REROLL_COST || isRerolling) return
 
-    const shopItems = Object.values(SAMPLE_ITEMS)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 4)
-
-    setGameState((prev) => ({
-      ...prev,
-      playerStats: {
-        ...prev.playerStats,
-        gold: prev.playerStats.gold - REROLL_COST,
-      },
-      shopItems: shopItems,
-    }))
+    const success = await rerollShop()
+    if (success) {
+      setGameState((prev) => ({
+        ...prev,
+        playerStats: {
+          ...prev.playerStats,
+          gold: prev.playerStats.gold - REROLL_COST,
+        },
+      }))
+    }
   }
+
+  React.useEffect(() => {
+    if (shopData) {
+      setGameState((prev) => ({
+        ...prev,
+        shopItems: [
+          shopData.item1_id,
+          shopData.item2_id,
+          shopData.item3_id,
+          shopData.item4_id,
+        ]
+          .map((itemId) => SAMPLE_ITEMS[itemId])
+          .filter(Boolean),
+      }))
+    }
+  }, [shopData])
 
   const handleDragStart = (item: Item, index: number) => {
     setGameState((prev) => ({
@@ -274,6 +298,9 @@ export default function Home() {
               onPurchase={() => {}}
               onDragEnd={handleDragEnd}
               onRotate={handleRotate}
+              isRerolling={isRerolling}
+              error={shopError}
+              onErrorDismiss={clearError}
             />
           </div>
         </div>

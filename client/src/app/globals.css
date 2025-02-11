@@ -367,3 +367,47 @@ html {
 .stat-value.hp.increasing {
   text-shadow: 0 0 15px rgba(34, 197, 94, 0.8);
 }
+
+.shop-container.rerolling {
+  position: relative;
+}
+
+.shop-container.rerolling::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+  pointer-events: all;
+  z-index: 10;
+}
+
+.shop-items-grid.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
