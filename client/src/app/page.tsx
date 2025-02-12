@@ -187,13 +187,7 @@ export default function Home() {
       gameState
 
     if (!selectedItem) {
-      setGameState((prev) => ({
-        ...prev,
-        selectedItem: undefined,
-        selectedItemIndex: undefined,
-        previewPosition: undefined,
-        previewRotation: 0,
-      }))
+      handleDragEnd()
       return
     }
 
@@ -205,34 +199,11 @@ export default function Home() {
     )
 
     if (!validation.isValid) {
-      setGameState((prev) => ({
-        ...prev,
-        selectedItem: undefined,
-        selectedItemIndex: undefined,
-        previewPosition: undefined,
-        previewRotation: 0,
-      }))
+      handleDragEnd()
       return
     }
 
-    // Call buyItem before updating the local state
-    const success = await buyItem(
-      selectedItem.item_id,
-      position,
-      previewRotation || 0,
-    )
-
-    if (!success) {
-      setGameState((prev) => ({
-        ...prev,
-        selectedItem: undefined,
-        selectedItemIndex: undefined,
-        previewPosition: undefined,
-        previewRotation: 0,
-      }))
-      return
-    }
-
+    // Create the new item first
     const newId = getEmptySlotId(inventory, inventoryCount)
     const newItem = {
       ...selectedItem,
@@ -241,17 +212,15 @@ export default function Home() {
       rotation: (previewRotation || 0) as 0 | 90 | 180 | 270,
     }
 
+    // Update the state immediately to show the item
     setGameState((prev) => {
       setPreviousStats(prev.playerStats)
-
-      const newInventory = [...prev.inventory, newItem]
-
       return {
         ...prev,
         shopItems: prev.shopItems.filter(
           (_, index) => index !== prev.selectedItemIndex,
         ),
-        inventory: newInventory,
+        inventory: [...prev.inventory, newItem],
         inventoryCount: newId > inventoryCount ? newId : inventoryCount,
         selectedItem: undefined,
         selectedItemIndex: undefined,
@@ -259,6 +228,23 @@ export default function Home() {
         previewRotation: 0,
       }
     })
+
+    // Call buyItem after updating the local state
+    const success = await buyItem(
+      selectedItem.item_id,
+      position,
+      previewRotation || 0,
+    )
+
+    // If the transaction failed, revert the changes
+    if (!success) {
+      setGameState((prev) => ({
+        ...prev,
+        shopItems: [...prev.shopItems, selectedItem],
+        inventory: prev.inventory.filter((item) => item.id !== newId),
+        inventoryCount: prev.inventoryCount - 1,
+      }))
+    }
   }
 
   const handleDiscardItem = (id: number) => {
