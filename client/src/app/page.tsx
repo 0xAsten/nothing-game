@@ -326,6 +326,7 @@ export default function Home() {
               onDragOver={handleDragOver}
               onRotate={handleRotate}
               onDiscardItem={handleDiscardItem}
+              isBuying={isBuying}
             />
           </div>
           <div>
@@ -338,6 +339,7 @@ export default function Home() {
               onDragEnd={handleDragEnd}
               onRotate={handleRotate}
               isRerolling={isRerolling}
+              isBuying={isBuying}
               error={shopError}
               onErrorDismiss={clearError}
             />
@@ -376,20 +378,6 @@ export default function Home() {
       {/* Add error handling for buy errors */}
       {buyError && (
         <Alert type="error" message={buyError} onClose={clearBuyError} />
-      )}
-
-      {/* Add loading state for buying */}
-      {isBuying && (
-        <div className="buying-overlay">
-          <div className="buying-content">
-            <h2 className="text-3xl font-bold text-blue-500 mb-4">
-              Buying Item...
-            </h2>
-            <p className="text-gray-400">
-              Please wait while your purchase is being processed
-            </p>
-          </div>
-        </div>
       )}
     </main>
   )

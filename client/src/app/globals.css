@@ -523,3 +523,77 @@ html {
     transform: scale(0.98);
   }
 }
+
+/* Add a buying animation for the grid and shop */
+.buying-active {
+  position: relative;
+}
+
+.buying-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(79, 70, 229, 0.2),
+    rgba(139, 92, 246, 0.2)
+  );
+  backdrop-filter: blur(1px);
+  border-radius: inherit;
+  pointer-events: all;
+  z-index: 10;
+  animation: buyingPulse 1.5s ease-in-out infinite;
+}
+
+.buying-active .grid-cell {
+  transition: all 0.3s ease;
+  animation: cellPulse 2s ease-in-out infinite;
+}
+
+@keyframes buyingPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    background: linear-gradient(
+      45deg,
+      rgba(79, 70, 229, 0.2),
+      rgba(139, 92, 246, 0.2)
+    );
+  }
+  50% {
+    opacity: 0.3;
+    background: linear-gradient(
+      45deg,
+      rgba(139, 92, 246, 0.2),
+      rgba(79, 70, 229, 0.2)
+    );
+  }
+}
+
+@keyframes cellPulse {
+  0%,
+  100% {
+    background: rgba(30, 41, 59, 0.6);
+  }
+  50% {
+    background: rgba(79, 70, 229, 0.15);
+  }
+}
+
+/* Add a subtle glow effect for the selected item during buying */
+.buying-active .selected-item {
+  filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.6));
+  animation: selectedItemPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selectedItemPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.6));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(79, 70, 229, 0.8));
+  }
+}

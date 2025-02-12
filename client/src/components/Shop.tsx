@@ -16,6 +16,7 @@ interface ShopProps {
   isRerolling?: boolean
   error?: string | null
   onErrorDismiss?: () => void
+  isBuying?: boolean
 }
 
 const Shop: React.FC<ShopProps> = ({
@@ -29,6 +30,7 @@ const Shop: React.FC<ShopProps> = ({
   isRerolling = false,
   error,
   onErrorDismiss,
+  isBuying = false,
 }) => {
   const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
   const dragImages = React.useRef<{ [key: string]: HTMLImageElement }>({})
@@ -163,7 +165,11 @@ const Shop: React.FC<ShopProps> = ({
 
   return (
     <>
-      <div className={`shop-container ${isRerolling ? 'rerolling' : ''}`}>
+      <div
+        className={`shop-container ${isRerolling ? 'rerolling' : ''} ${
+          isBuying ? 'buying-active' : ''
+        }`}
+      >
         <div className="shop-header">
           <div className="flex items-center gap-4">
             <h2 className="shop-title">Shop</h2>

@@ -20,6 +20,7 @@ interface GridProps {
   onDragOver: (position: GridPosition) => void
   onRotate: () => void
   onDiscardItem?: (id: number) => void
+  isBuying?: boolean
 }
 
 const Grid: React.FC<GridProps> = ({
@@ -32,6 +33,7 @@ const Grid: React.FC<GridProps> = ({
   onDragOver,
   onRotate,
   onDiscardItem,
+  isBuying = false,
 }) => {
   const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
   const gridRef = React.useRef<HTMLDivElement>(null)
@@ -213,7 +215,7 @@ const Grid: React.FC<GridProps> = ({
       </div>
       <div
         ref={gridRef}
-        className="relative"
+        className={`relative ${isBuying ? 'buying-active' : ''}`}
         style={{
           width: `${GRID_WIDTH * 64}px`,
           height: `${GRID_HEIGHT * 64}px`,
