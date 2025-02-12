@@ -471,3 +471,55 @@ html {
     opacity: 1;
   }
 }
+
+.buying-overlay {
+  @apply fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.buying-content {
+  @apply text-center bg-gray-900/95 p-8 rounded-lg border-2 border-blue-500/30 max-w-md w-full mx-4;
+  animation: slideUp 0.3s ease-out;
+}
+
+.buying-content h2 {
+  @apply text-2xl font-bold mb-4;
+  background: linear-gradient(to right, #4f46e5, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.buying-content p {
+  @apply text-gray-400;
+}
+
+/* Add a loading spinner animation for the buying state */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Add a subtle pulse animation to the buying content */
+.buying-content {
+  animation: buyingPulse 2s infinite;
+}
+
+@keyframes buyingPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(0.98);
+  }
+}

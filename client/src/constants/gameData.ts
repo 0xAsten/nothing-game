@@ -11,11 +11,12 @@ export const INITIAL_PLAYER_STATS = {
   health: INITIAL_HEALTH,
   attack: 0,
   defense: 0,
+  initialized: true,
 }
 
 export const SAMPLE_ITEMS: Record<number, Item> = {
-  1: {
-    item_id: 1,
+  2: {
+    item_id: 2,
     name: 'Rusty Sword',
     item_type: ItemType.WEAPON,
     rarity: 1,
@@ -30,8 +31,8 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     stack_group_id: StackGroup.WARRIOR,
     image_url: '/items/rusty-sword.png',
   },
-  2: {
-    item_id: 2,
+  1: {
+    item_id: 1,
     name: 'Leather Armor',
     item_type: ItemType.ARMOR,
     rarity: 1,
@@ -62,8 +63,8 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     stack_group_id: StackGroup.NONE,
     image_url: '/items/small-pouch.png',
   },
-  4: {
-    item_id: 4,
+  5: {
+    item_id: 5,
     name: 'Warrior Ring',
     item_type: ItemType.ACCESSORY,
     rarity: 2,
@@ -78,8 +79,8 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     stack_group_id: StackGroup.WARRIOR,
     image_url: '/items/warrior-ring.png',
   },
-  5: {
-    item_id: 5,
+  4: {
+    item_id: 4,
     name: 'Twin Daggers',
     item_type: ItemType.WEAPON,
     rarity: 2,

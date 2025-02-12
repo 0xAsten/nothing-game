@@ -89,7 +89,7 @@ export const GET_CHAR_ITEMS_QUERY = gql`
 `
 
 export const SHOP_SUBSCRIPTION = gql`
-  subscription EntityUpdated($address: String!) {
+  subscription EntityUpdated {
     entityUpdated {
       models {
         ... on nothing_game_Shop {
@@ -98,6 +98,23 @@ export const SHOP_SUBSCRIPTION = gql`
           item2_id
           item3_id
           item4_id
+        }
+      }
+    }
+  }
+`
+
+export const USER_STATS_SUBSCRIPTION = gql`
+  subscription EntityUpdated {
+    entityUpdated {
+      models {
+        ... on nothing_game_Character {
+          player
+          gold
+          initialized
+          attack
+          defense
+          health
         }
       }
     }

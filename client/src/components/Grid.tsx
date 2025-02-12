@@ -40,6 +40,17 @@ const Grid: React.FC<GridProps> = ({
     Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
   )
 
+  // Sort items so that bags appear below other items
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.item_type === ItemType.BAG && b.item_type !== ItemType.BAG) {
+      return -1
+    }
+    if (a.item_type !== ItemType.BAG && b.item_type === ItemType.BAG) {
+      return 1
+    }
+    return 0
+  })
+
   const handleDragOver = useCallback(
     (e: React.DragEvent, position: GridPosition) => {
       e.preventDefault()
@@ -229,7 +240,7 @@ const Grid: React.FC<GridProps> = ({
             )),
           )}
         </div>
-        {items.map(renderItem)}
+        {sortedItems.map(renderItem)}
         {renderPreview()}
       </div>
     </div>

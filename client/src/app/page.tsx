@@ -31,6 +31,8 @@ import { useUser } from '@/contexts/UserContext'
 import { useShop } from '@/hooks/useShop'
 import { useReset } from '@/hooks/useReset'
 import { ResetDialog } from '@/components/ResetDialog'
+import { useBuyItem } from '@/hooks/useBuyItem'
+import { Alert } from '@/components/ui/Alert'
 
 export default function Home() {
   const { address } = useAccount()
@@ -50,6 +52,13 @@ export default function Home() {
     error: shopError,
     clearError,
   } = useShop()
+
+  const {
+    buyItem,
+    isBuying,
+    error: buyError,
+    clearError: clearBuyError,
+  } = useBuyItem()
 
   const [gameState, setGameState] = React.useState<GameState>({
     playerStats: userStats || INITIAL_PLAYER_STATS,
@@ -173,9 +182,10 @@ export default function Home() {
     }))
   }
 
-  const handleDrop = (position: GridPosition) => {
+  const handleDrop = async (position: GridPosition) => {
     const { selectedItem, inventory, inventoryCount, previewRotation } =
       gameState
+
     if (!selectedItem) {
       setGameState((prev) => ({
         ...prev,
@@ -205,6 +215,24 @@ export default function Home() {
       return
     }
 
+    // Call buyItem before updating the local state
+    const success = await buyItem(
+      selectedItem.item_id,
+      position,
+      previewRotation || 0,
+    )
+
+    if (!success) {
+      setGameState((prev) => ({
+        ...prev,
+        selectedItem: undefined,
+        selectedItemIndex: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      }))
+      return
+    }
+
     const newId = getEmptySlotId(inventory, inventoryCount)
     const newItem = {
       ...selectedItem,
@@ -217,7 +245,6 @@ export default function Home() {
       setPreviousStats(prev.playerStats)
 
       const newInventory = [...prev.inventory, newItem]
-      const specialEffects = calculateSpecialEffects(newInventory)
 
       return {
         ...prev,
@@ -226,22 +253,6 @@ export default function Home() {
         ),
         inventory: newInventory,
         inventoryCount: newId > inventoryCount ? newId : inventoryCount,
-        playerStats: {
-          ...prev.playerStats,
-          gold: prev.playerStats.gold - selectedItem.price,
-          attack:
-            INITIAL_PLAYER_STATS.attack +
-            newItem.attack +
-            specialEffects.attack,
-          defense:
-            INITIAL_PLAYER_STATS.defense +
-            newItem.defense +
-            specialEffects.defense,
-          health:
-            INITIAL_PLAYER_STATS.health +
-            newItem.health +
-            specialEffects.health,
-        },
         selectedItem: undefined,
         selectedItemIndex: undefined,
         previewPosition: undefined,
@@ -357,6 +368,25 @@ export default function Home() {
             </h2>
             <p className="text-gray-400">
               Please wait while your progress is being reset
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Add error handling for buy errors */}
+      {buyError && (
+        <Alert type="error" message={buyError} onClose={clearBuyError} />
+      )}
+
+      {/* Add loading state for buying */}
+      {isBuying && (
+        <div className="buying-overlay">
+          <div className="buying-content">
+            <h2 className="text-3xl font-bold text-blue-500 mb-4">
+              Buying Item...
+            </h2>
+            <p className="text-gray-400">
+              Please wait while your purchase is being processed
             </p>
           </div>
         </div>

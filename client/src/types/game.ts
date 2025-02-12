@@ -43,6 +43,7 @@ export interface PlayerStats {
   health: number
   attack: number
   defense: number
+  initialized: boolean
 }
 
 export interface GridPosition {
