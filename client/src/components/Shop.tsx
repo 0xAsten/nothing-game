@@ -63,13 +63,24 @@ const Shop: React.FC<ShopProps> = ({
     })
   }, [items])
 
+  // Add this effect to clear dragging state when items change
+  React.useEffect(() => {
+    setDraggingIndex(null)
+  }, [items])
+
   const handleDragStart = (e: React.DragEvent, item: Item, index: number) => {
     if (gold < item.price) {
       e.preventDefault()
       return
     }
 
-    setDraggingIndex(index)
+    // Clear any existing dragging state first
+    setDraggingIndex(null)
+
+    // Small timeout to ensure state is cleared before setting new index
+    setTimeout(() => {
+      setDraggingIndex(index)
+    }, 0)
 
     if (item.image_url && dragImages.current[item.image_url]) {
       e.dataTransfer.setDragImage(dragImages.current[item.image_url], 24, 24)
@@ -80,8 +91,13 @@ const Shop: React.FC<ShopProps> = ({
   }
 
   const handleDragEnd = () => {
-    setDraggingIndex(null)
-    onDragEnd()
+    // Use a callback to ensure we're working with the latest state
+    setDraggingIndex((currentIndex) => {
+      if (currentIndex !== null) {
+        onDragEnd()
+      }
+      return null
+    })
   }
 
   const handleDrag = (e: React.DragEvent) => {
