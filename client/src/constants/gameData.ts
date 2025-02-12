@@ -2,7 +2,7 @@ import { Item, ItemType, SpecialEffect, StackGroup } from '@/types/game'
 
 export const GRID_WIDTH = 9
 export const GRID_HEIGHT = 7
-export const INITIAL_GOLD = 300
+export const INITIAL_GOLD = 120
 export const INITIAL_HEALTH = 100
 export const REROLL_COST = 10
 
@@ -22,8 +22,8 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     rarity: 1,
     width: 1,
     height: 2,
-    price: 50,
-    attack: 10,
+    price: 10,
+    attack: 5,
     defense: 0,
     health: 0,
     special_effect: SpecialEffect.NONE,
@@ -38,10 +38,10 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     rarity: 1,
     width: 2,
     height: 2,
-    price: 75,
+    price: 15,
     attack: 0,
-    defense: 15,
-    health: 20,
+    defense: 5,
+    health: 10,
     special_effect: SpecialEffect.NONE,
     special_effect_stacks: 0,
     stack_group_id: StackGroup.RANGER,
@@ -70,7 +70,7 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     rarity: 2,
     width: 1,
     height: 1,
-    price: 50,
+    price: 10,
     attack: 0,
     defense: 0,
     health: 0,

@@ -61,7 +61,7 @@ export default function Home() {
   } = useBuyItem()
 
   const [gameState, setGameState] = React.useState<GameState>({
-    playerStats: userStats || INITIAL_PLAYER_STATS,
+    playerStats: INITIAL_PLAYER_STATS,
     inventory: [],
     inventoryCount: 0,
     shopItems: [],
@@ -108,6 +108,15 @@ export default function Home() {
 
     loadGameData()
   }, [address])
+
+  React.useEffect(() => {
+    if (userStats) {
+      setGameState((prev) => ({
+        ...prev,
+        playerStats: userStats,
+      }))
+    }
+  }, [userStats])
 
   const handleReroll = async () => {
     if (!userStats || userStats.gold < REROLL_COST || isRerolling) return

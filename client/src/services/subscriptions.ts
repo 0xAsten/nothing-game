@@ -59,6 +59,7 @@ export function subscribeToUserStats(
             model?.player?.toLowerCase().replace(/^0x0+/, '0x') ===
             address.toLowerCase().replace(/^0x0+/, '0x'),
         )
+        console.log('user stats data updated:', userStats)
         callbacks.onData(userStats || null)
       },
       error: (error: Error) => {
