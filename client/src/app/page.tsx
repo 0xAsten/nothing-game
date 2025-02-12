@@ -29,10 +29,19 @@ import {
 } from '@/services/game.service'
 import { useUser } from '@/contexts/UserContext'
 import { useShop } from '@/hooks/useShop'
+import { useReset } from '@/hooks/useReset'
+import { ResetDialog } from '@/components/ResetDialog'
 
 export default function Home() {
   const { address } = useAccount()
   const { userStats } = useUser()
+  const {
+    resetUser,
+    isResetting,
+    error: resetError,
+    showResetConfirmation,
+    setShowResetConfirmation,
+  } = useReset()
 
   const {
     isRerolling,
@@ -268,6 +277,25 @@ export default function Home() {
     })
   }
 
+  const handleReset = async () => {
+    setShowResetConfirmation(false)
+    const success = await resetUser()
+    if (success) {
+      // Reset local game state
+      setGameState({
+        playerStats: INITIAL_PLAYER_STATS,
+        inventory: [],
+        inventoryCount: 0,
+        shopItems: [],
+        selectedItem: undefined,
+        selectedItemIndex: undefined,
+        previewPosition: undefined,
+        previewRotation: 0,
+      })
+      setPreviousStats(undefined)
+    }
+  }
+
   return (
     <main className="min-h-screen">
       <div className="game-container">
@@ -305,6 +333,34 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Fixed position Reset button */}
+      <button
+        onClick={() => setShowResetConfirmation(true)}
+        className="fixed bottom-6 right-6 px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded hover:bg-red-500/30 transition-colors shadow-lg"
+      >
+        Reset Game
+      </button>
+
+      {showResetConfirmation && (
+        <ResetDialog
+          onConfirm={handleReset}
+          onCancel={() => setShowResetConfirmation(false)}
+        />
+      )}
+
+      {isResetting && (
+        <div className="resetting-overlay">
+          <div className="resetting-content">
+            <h2 className="text-3xl font-bold text-red-500 mb-4">
+              Resetting Game...
+            </h2>
+            <p className="text-gray-400">
+              Please wait while your progress is being reset
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -11,10 +11,6 @@ import { SessionPolicies } from '@cartridge/controller'
 import { constants } from 'starknet'
 import { CHARACTER_SYSTEM, SHOP_SYSTEM } from '../config/contracts'
 
-// Define your contract addresses
-const ETH_TOKEN_ADDRESS =
-  '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7'
-
 // Define session policies
 const policies: SessionPolicies = {
   contracts: {
@@ -35,6 +31,10 @@ const policies: SessionPolicies = {
         {
           name: 'upgrade',
           entrypoint: 'upgrade',
+        },
+        {
+          name: 'reset',
+          entrypoint: 'reset',
         },
       ],
     },

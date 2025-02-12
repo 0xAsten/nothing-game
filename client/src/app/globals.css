@@ -411,3 +411,63 @@ html {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+.reset-overlay {
+  @apply fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.reset-dialog {
+  @apply bg-gray-900/95 p-8 rounded-lg border-2 border-red-500/30 max-w-md w-full mx-4;
+  animation: slideUp 0.3s ease-out;
+}
+
+.reset-title {
+  @apply text-2xl font-bold text-red-500 mb-4;
+}
+
+.reset-message {
+  @apply text-gray-300 mb-6;
+}
+
+.reset-buttons {
+  @apply flex gap-4 justify-end;
+}
+
+.reset-confirm {
+  @apply px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors;
+}
+
+.reset-cancel {
+  @apply px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors;
+}
+
+.resetting-overlay {
+  @apply fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col items-center justify-center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.resetting-content {
+  @apply text-center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
