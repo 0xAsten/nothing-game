@@ -51,8 +51,6 @@ export function useDiscardItem(): UseDiscardItemResult {
   }, [])
 
   const discardItem = async (slotId: number) => {
-    console.log('discardItem', slotId)
-
     if (!address || !contract || !sendAsync) {
       setError('Contract not initialized')
       return false

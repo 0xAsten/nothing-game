@@ -180,7 +180,6 @@ export default function Home() {
   }
 
   const handleDragOver = (position: GridPosition) => {
-    // console.log('handleDragOver', position)
     setGameState((prev) => ({
       ...prev,
       previewPosition: position,

@@ -44,7 +44,7 @@ const Grid: React.FC<GridProps> = ({
     Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
   )
 
-  console.log('items', items)
+  // console.log('items', items)
 
   // Sort items so that bags appear below other items
   const sortedItems = [...items].sort((a, b) => {

@@ -7,9 +7,9 @@ export enum ItemType {
 
 export enum SpecialEffect {
   NONE = 0,
-  ATTACK = 1,
-  DEFENSE = 2,
-  HEALTH = 3,
+  ATK = 1,
+  DEF = 2,
+  HP = 3,
 }
 
 export enum StackGroup {

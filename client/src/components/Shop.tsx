@@ -171,7 +171,7 @@ const Shop: React.FC<ShopProps> = ({
 
         {item.item_type === ItemType.ACCESSORY && item.special_effect && (
           <div className="mt-2 text-sm font-medium text-purple-300">
-            Enhance {item.special_effect}
+            Enhance {SpecialEffect[item.special_effect]}
             {item.special_effect_stacks && item.special_effect_stacks > 1 && (
               <span className="ml-1">({item.special_effect_stacks})</span>
             )}

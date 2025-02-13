@@ -177,9 +177,13 @@ mod character_system {
                             if adjacent {
                                 character_item.effect_applied = true;
 
-                                character.attack += item.attack;
-                                character.defense += item.defense;
-                                character.health += item.health;
+                                match item.special_effect {
+                                    0 => {},
+                                    1 => character.attack += item.special_effect_stacks,
+                                    2 => character.defense += item.special_effect_stacks,
+                                    3 => character.health += item.special_effect_stacks,
+                                    _ => {},
+                                }
                             }
                         } else if (character_item.item_type != 3
                             && current_character_item.item_type == 3
@@ -195,9 +199,13 @@ mod character_system {
 
                                 let current_item: Item = world
                                     .read_model(current_character_item.item_id);
-                                character.attack += current_item.attack;
-                                character.defense += current_item.defense;
-                                character.health += current_item.health;
+                                match current_item.special_effect {
+                                    0 => {},
+                                    1 => character.attack += current_item.special_effect_stacks,
+                                    2 => character.defense += current_item.special_effect_stacks,
+                                    3 => character.health += current_item.special_effect_stacks,
+                                    _ => {},
+                                }
 
                                 world.write_model(@current_character_item);
                             }

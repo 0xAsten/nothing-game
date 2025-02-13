@@ -74,7 +74,7 @@ export const SAMPLE_ITEMS: Record<number, Item> = {
     attack: 0,
     defense: 0,
     health: 0,
-    special_effect: SpecialEffect.ATTACK,
+    special_effect: SpecialEffect.ATK,
     special_effect_stacks: 5,
     stack_group_id: StackGroup.WARRIOR,
     image_url: '/items/warrior-ring.png',
