@@ -200,6 +200,7 @@ export const calculateSpecialEffects = (
     attack: 0,
     defense: 0,
     health: 0,
+    initialized: false,
   }
 
   const accessories = inventory.filter(

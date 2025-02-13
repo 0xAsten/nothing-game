@@ -26,6 +26,7 @@ import {
   getPlayerGrid,
   getPlayerShop,
   getPlayerItems,
+  getPlayerItemsRegistry,
 } from '@/services/game.service'
 import { useUser } from '@/contexts/UserContext'
 import { useShop } from '@/hooks/useShop'
@@ -33,6 +34,7 @@ import { useReset } from '@/hooks/useReset'
 import { ResetDialog } from '@/components/ResetDialog'
 import { useBuyItem } from '@/hooks/useBuyItem'
 import { Alert } from '@/components/ui/Alert'
+import { useDiscardItem } from '@/hooks/useDiscardItem'
 
 export default function Home() {
   const { address } = useAccount()
@@ -60,6 +62,13 @@ export default function Home() {
     clearError: clearBuyError,
   } = useBuyItem()
 
+  const {
+    discardItem,
+    isDiscarding,
+    error: discardError,
+    clearError: clearDiscardError,
+  } = useDiscardItem()
+
   const [gameState, setGameState] = React.useState<GameState>({
     playerStats: INITIAL_PLAYER_STATS,
     inventory: [],
@@ -79,9 +88,10 @@ export default function Home() {
     if (!address) return
 
     const loadGameData = async () => {
-      const [shopData, itemsData] = await Promise.all([
+      const [shopData, itemsData, itemsRegistry] = await Promise.all([
         getPlayerShop(address),
         getPlayerItems(address),
+        getPlayerItemsRegistry(address),
       ])
 
       // Update game state with grid and shop data
@@ -93,6 +103,7 @@ export default function Home() {
           position: { x: item.position.x, y: item.position.y },
           rotation: (item.rotation * 90) as 0 | 90 | 180 | 270,
         })),
+        inventoryCount: itemsRegistry?.next_slot_id || 0,
         shopItems: shopData
           ? [
               shopData.item1_id,
@@ -251,36 +262,32 @@ export default function Home() {
         ...prev,
         shopItems: [...prev.shopItems, selectedItem],
         inventory: prev.inventory.filter((item) => item.id !== newId),
-        inventoryCount: prev.inventoryCount - 1,
+        inventoryCount: inventoryCount,
       }))
     }
   }
 
-  const handleDiscardItem = (id: number) => {
+  const handleDiscardItem = async (id: number) => {
+    console.log('handleDiscardItem id:', id)
+    const item = gameState.inventory.find((i) => i.id === id)
+    if (!item) return
+
     setGameState((prev) => {
       setPreviousStats(prev.playerStats)
 
-      const item = prev.inventory.find((i) => i.id === id)
-      if (!item) return prev
-      const newInventory = prev.inventory.filter((i) => i.id !== id)
-      const specialEffects = calculateSpecialEffects(newInventory)
-
       return {
         ...prev,
-        inventory: newInventory,
-        playerStats: {
-          ...prev.playerStats,
-          attack:
-            INITIAL_PLAYER_STATS.attack - item.attack + specialEffects.attack,
-          defense:
-            INITIAL_PLAYER_STATS.defense -
-            item.defense +
-            specialEffects.defense,
-          health:
-            INITIAL_PLAYER_STATS.health - item.health + specialEffects.health,
-        },
+        inventory: prev.inventory.filter((i) => i.id !== id),
       }
     })
+
+    const success = await discardItem(id)
+    if (!success) {
+      setGameState((prev) => ({
+        ...prev,
+        inventory: [...prev.inventory, item],
+      }))
+    }
   }
 
   const handleReset = async () => {
@@ -322,6 +329,7 @@ export default function Home() {
               onRotate={handleRotate}
               onDiscardItem={handleDiscardItem}
               isBuying={isBuying}
+              isDiscarding={isDiscarding}
             />
           </div>
           <div>
@@ -335,6 +343,7 @@ export default function Home() {
               onRotate={handleRotate}
               isRerolling={isRerolling}
               isBuying={isBuying}
+              isDiscarding={isDiscarding}
               error={shopError}
               onErrorDismiss={clearError}
             />
@@ -373,6 +382,14 @@ export default function Home() {
       {/* Add error handling for buy errors */}
       {buyError && (
         <Alert type="error" message={buyError} onClose={clearBuyError} />
+      )}
+
+      {discardError && (
+        <Alert
+          type="error"
+          message={discardError}
+          onClose={clearDiscardError}
+        />
       )}
     </main>
   )

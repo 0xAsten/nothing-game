@@ -3,6 +3,7 @@ import {
   GET_GRID_QUERY,
   GET_SHOP_QUERY,
   GET_CHAR_ITEMS_QUERY,
+  GET_CHAR_ITEMS_REGISTRY_QUERY,
 } from './api/queries'
 
 interface GridCell {
@@ -35,6 +36,11 @@ interface Item {
   effect_applied: boolean
 }
 
+interface ItemRegistry {
+  player: string
+  next_slot_id: number
+}
+
 interface GridResponse {
   nothingGameBackpackGridModels: {
     totalCount: number
@@ -57,6 +63,14 @@ interface ItemResponse {
   nothingGameCharacterItemModels: {
     edges: Array<{
       node: Item
+    }>
+  }
+}
+
+interface ItemRegistryResponse {
+  nothingGameCharacterItemRegistryModels: {
+    edges: Array<{
+      node: ItemRegistry
     }>
   }
 }
@@ -99,5 +113,22 @@ export async function getPlayerItems(address: string): Promise<Item[]> {
   } catch (error) {
     console.error('Error fetching items:', error)
     return []
+  }
+}
+
+export async function getPlayerItemsRegistry(
+  address: string,
+): Promise<ItemRegistry | null> {
+  try {
+    const data = await graphqlClient.request<ItemRegistryResponse>(
+      GET_CHAR_ITEMS_REGISTRY_QUERY,
+      {
+        address,
+      },
+    )
+    return data.nothingGameCharacterItemRegistryModels.edges[0]?.node || null
+  } catch (error) {
+    console.error('Error fetching items registry:', error)
+    return null
   }
 }

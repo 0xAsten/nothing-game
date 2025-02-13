@@ -21,6 +21,7 @@ interface GridProps {
   onRotate: () => void
   onDiscardItem?: (id: number) => void
   isBuying?: boolean
+  isDiscarding?: boolean
 }
 
 const Grid: React.FC<GridProps> = ({
@@ -34,6 +35,7 @@ const Grid: React.FC<GridProps> = ({
   onRotate,
   onDiscardItem,
   isBuying = false,
+  isDiscarding = false,
 }) => {
   const [draggingIndex, setDraggingIndex] = React.useState<number | null>(null)
   const gridRef = React.useRef<HTMLDivElement>(null)
@@ -41,6 +43,8 @@ const Grid: React.FC<GridProps> = ({
   const cells = Array.from({ length: GRID_HEIGHT }, (_, y) =>
     Array.from({ length: GRID_WIDTH }, (_, x) => ({ x, y })),
   )
+
+  console.log('items', items)
 
   // Sort items so that bags appear below other items
   const sortedItems = [...items].sort((a, b) => {
@@ -215,7 +219,9 @@ const Grid: React.FC<GridProps> = ({
       </div>
       <div
         ref={gridRef}
-        className={`relative ${isBuying ? 'buying-active' : ''}`}
+        className={`relative ${
+          isBuying || isDiscarding ? 'buying-active' : ''
+        }`}
         style={{
           width: `${GRID_WIDTH * 64}px`,
           height: `${GRID_HEIGHT * 64}px`,

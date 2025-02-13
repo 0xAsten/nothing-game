@@ -88,6 +88,19 @@ export const GET_CHAR_ITEMS_QUERY = gql`
   }
 `
 
+export const GET_CHAR_ITEMS_REGISTRY_QUERY = gql`
+  query NothingGameCharacterItemRegistryModels($address: String!) {
+    nothingGameCharacterItemRegistryModels(where: { playerEQ: $address }) {
+      edges {
+        node {
+          player
+          next_slot_id
+        }
+      }
+    }
+  }
+`
+
 export const SHOP_SUBSCRIPTION = gql`
   subscription EntityUpdated {
     entityUpdated {
