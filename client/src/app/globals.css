@@ -597,3 +597,12 @@ html {
     filter: drop-shadow(0 0 12px rgba(79, 70, 229, 0.8));
   }
 }
+
+.shop-item-empty {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.shop-item-empty:hover {
+  opacity: 0.8;
+}

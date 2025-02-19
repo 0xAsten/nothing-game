@@ -36,7 +36,12 @@ export function useUserVerification(): UseUserVerificationResult {
   })
 
   useEffect(() => {
-    if (!address) return
+    if (!address) {
+      setIsVerified(false)
+      setUserStats(null)
+      setIsLoading(false)
+      return
+    }
 
     // Initial fetch of user stats
     const fetchInitialStats = async () => {

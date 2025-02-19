@@ -14,6 +14,8 @@ import {
   GridPosition,
   PlacedItem,
   PlayerStats,
+  ItemType,
+  SpecialEffect,
 } from '@/types/game'
 import {
   validatePlacement,
@@ -35,6 +37,22 @@ import { ResetDialog } from '@/components/ResetDialog'
 import { useBuyItem } from '@/hooks/useBuyItem'
 import { Alert } from '@/components/ui/Alert'
 import { useDiscardItem } from '@/hooks/useDiscardItem'
+
+const EMPTY_SLOT: Item = {
+  item_id: 0,
+  name: 'Empty Slot',
+  item_type: ItemType.EMPTY,
+  rarity: 0,
+  width: 1,
+  height: 1,
+  price: 0,
+  attack: 0,
+  defense: 0,
+  health: 0,
+  special_effect: SpecialEffect.NONE,
+  special_effect_stacks: 0,
+  stack_group_id: 0,
+}
 
 export default function Home() {
   const { address } = useAccount()
@@ -111,8 +129,12 @@ export default function Home() {
               shopData.item3_id,
               shopData.item4_id,
             ]
-              .map((itemId) => SAMPLE_ITEMS[itemId])
-              .filter(Boolean)
+              .map((itemId) =>
+                itemId === 0
+                  ? { item_id: 0, name: 'Empty Slot' }
+                  : SAMPLE_ITEMS[itemId],
+              )
+              .filter((item): item is Item => Boolean(item))
           : [],
       }))
     }
@@ -133,6 +155,7 @@ export default function Home() {
     if (!userStats || userStats.gold < REROLL_COST || isRerolling) return
 
     const success = await rerollShop()
+    console.log('is reroll success', success)
     if (success) {
       setGameState((prev) => ({
         ...prev,
@@ -154,8 +177,12 @@ export default function Home() {
           shopData.item3_id,
           shopData.item4_id,
         ]
-          .map((itemId) => SAMPLE_ITEMS[itemId])
-          .filter(Boolean),
+          .map((itemId) =>
+            itemId === 0
+              ? { item_id: 0, name: 'Empty Slot' }
+              : SAMPLE_ITEMS[itemId],
+          )
+          .filter((item): item is Item => Boolean(item)),
       }))
     }
   }, [shopData])
@@ -236,8 +263,8 @@ export default function Home() {
       setPreviousStats(prev.playerStats)
       return {
         ...prev,
-        shopItems: prev.shopItems.filter(
-          (_, index) => index !== prev.selectedItemIndex,
+        shopItems: prev.shopItems.map((item, idx) =>
+          idx === prev.selectedItemIndex ? EMPTY_SLOT : item,
         ),
         inventory: [...prev.inventory, newItem],
         inventoryCount: newId > inventoryCount ? newId : inventoryCount,

@@ -1,4 +1,5 @@
 export enum ItemType {
+  EMPTY = 0,
   WEAPON = 1,
   ARMOR = 2,
   ACCESSORY = 3,

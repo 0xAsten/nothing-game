@@ -112,6 +112,22 @@ const Shop: React.FC<ShopProps> = ({
   }
 
   const renderItemCard = (item: Item, index: number) => {
+    // Handle empty slot
+    if (item.item_id === 0) {
+      return (
+        <div key={index} className="shop-item shop-item-empty">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500 text-center">
+              <div className="w-12 h-12 bg-gray-800/30 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
+                <span className="text-2xl">?</span>
+              </div>
+              <div className="mt-2">Empty Slot</div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     const canAfford = gold >= item.price
     const isDragging = index === draggingIndex
 

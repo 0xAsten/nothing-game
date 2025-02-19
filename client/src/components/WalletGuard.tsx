@@ -12,6 +12,8 @@ export function WalletGuard({ children }: WalletGuardProps) {
   const { address } = useAccount()
   const { isLoading, isVerified, error, spawnUser } = useUser()
 
+  console.log('isVerified', isVerified)
+
   if (!address) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
@@ -58,5 +60,7 @@ export function WalletGuard({ children }: WalletGuardProps) {
     )
   }
 
-  return <>{children}</>
+  if (isVerified && !isLoading) {
+    return <>{children}</>
+  }
 }

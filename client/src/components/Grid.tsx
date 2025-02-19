@@ -208,7 +208,7 @@ const Grid: React.FC<GridProps> = ({
   }, [selectedItem, previewPosition, previewRotation, items])
 
   return (
-    <div className="grid-container">
+    <div className="grid-container ">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
           Inventory Grid
@@ -219,7 +219,7 @@ const Grid: React.FC<GridProps> = ({
       </div>
       <div
         ref={gridRef}
-        className={`relative ${
+        className={`relative grid-cells ${
           isBuying || isDiscarding ? 'buying-active' : ''
         }`}
         style={{
